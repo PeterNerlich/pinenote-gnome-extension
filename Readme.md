@@ -1,4 +1,4 @@
-# Gnome Pinenote helper extension
+# Pinenote Gnome Extension
 
 This is a very very hacky Gnome extension to interface with some of the
 rockchip_ebc kernel driver options. It also provides a "rotate" menu option to
@@ -20,6 +20,13 @@ care. Suggestions are welcome!**
 
 * enable in gnome extension manager
 * restart gnome
+
+## Debian packaging
+
+	mkdir build
+	git clone https://github.com/PNDeb/pinenote-gnome-extension.git
+	cd pinenote-gnome-extension
+	dpkg-buildpackage -us -uc
 
 ## Testing under wayland
 
