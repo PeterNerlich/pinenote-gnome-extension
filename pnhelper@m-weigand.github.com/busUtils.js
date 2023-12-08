@@ -17,6 +17,11 @@
  *
  * Based on:
  * https://github.com/kosmospredanie/gnome-shell-extension-screen-autorotate/blob/main/screen-autorotate%40kosmospredanie.yandex.ru/busUtils.js
+ *
+ * The functions here basically all parse dbus messages, for more information,
+ * for example, see:
+ *
+ * https://github.com/GNOME/mutter/blob/b5f99bd12ebc483e682e39c8126a1b51772bc67d/data/dbus-interfaces/org.gnome.Mutter.DisplayConfig.xml
  */
 
 'use strict';
@@ -29,20 +34,30 @@ var Methods = Object.freeze({
     'persistent': 2
 });
 
+// Note: the dbus response consists of a lot of nested js tuples, hence the
+// unpack()s
 var Monitor = class Monitor {
     constructor(variant) {
         let unpacked = variant.unpack();
         this.connector = unpacked[0].unpack()[0].unpack();
 
         let modes = unpacked[1].unpack();
+		// print all available monitor ids
+        // for (let i = 0; i < modes.length; i++) {
+        //     let mode = modes[i].unpack();
+        //     let id = mode[0].unpack();
+			// log(id);
+		// }
+
         for (let i = 0; i < modes.length; i++) {
             let mode = modes[i].unpack();
-            let id = mode[0].unpack();
             let mode_props = mode[6].unpack();
+            let id = mode[0].unpack();
+
 			if ("is-current" in mode_props){
 				let is_current = mode_props['is-current'].unpack().get_boolean();
 				if (is_current) {
-					log("found current");
+					// log("found current");
 					this.current_mode_id = id;
 					break;
 				}
