@@ -19,6 +19,7 @@
  * https://raw.githubusercontent.com/kosmospredanie/gnome-shell-extension-screen-autorotate/main/screen-autorotate%40kosmospredanie.yandex.ru/extension.js
  */
 'use strict';
+
 const St = imports.gi.St;
 const { Clutter, GLib, Gio, GObject } = imports.gi;
 const QuickSettings = imports.ui.quickSettings;
@@ -33,6 +34,8 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Slider = imports.ui.slider;
 
+const ModalDialog = imports.ui.modalDialog;
+
 const Orientation = Object.freeze({
     'normal': 0,
     'left-up': 1,
@@ -43,6 +46,82 @@ const Orientation = Object.freeze({
 const BusUtils = Me.imports.busUtils;
 
 const ebc = Me.imports.ebc;
+
+// /////////////////////////////
+//
+
+var USBDialog = GObject.registerClass(
+	class USBDialog_a extends ModalDialog.ModalDialog {
+		_init() {
+			super._init();
+			// this.result = -1;
+
+			this._cancelButton = this.addButton({
+			// note: I get JS errors for this class, but am not
+			// sure if this is a bug in this code or in
+			// gnome-shell...
+			// error msg:
+			// JS ERROR: Error: Argument descendant may not be null
+			label: _('Do nothing'),
+				 action: this._onFailure.bind(this),
+				 key: Clutter.KEY_Escape,
+			});
+			this._okButton = this.addButton({
+				 label: _('Keep Changes'),
+				 action: this._onSuccess.bind(this),
+				 // default: true,
+			});
+			this._choice_3 = this.addButton({
+				 label: _('Variant 3'),
+				 //action: this._set_result(3),
+				 action: () => {
+					this._set_result(3)
+				},
+				//default: true,
+			});
+
+		}
+
+		_set_result(result) {
+			this.result = 3;
+			log("RESULT: ");
+			log(`${result}`)
+			this.close();
+			// return true;
+		};
+
+		    _onFailure() {
+			//this._wm.complete_display_change(false);
+			this.close();
+		    };
+
+		    _onSuccess() {
+			//this._wm.complete_display_change(true);
+			this.close();
+		    };
+	}
+);
+
+/*
+// Creating a dialog layout
+const parentActor = new St.Widget();
+const dialogLayout = new Dialog.Dialog(parentActor, 'my-dialog');
+
+// Adding a widget to the content area
+const icon = new St.Icon({icon_name: 'dialog-information-symbolic'});
+dialogLayout.contentLayout.add_child(icon);
+
+// Adding a default button
+dialogLayout.addButton({
+    label: 'Close',
+    isDefault: true,
+    action: () => {
+        dialogLayout.destroy();
+    },
+});
+*/
+
+// /////////////////////////////
 
 
 var TriggerRefreshButton = GObject.registerClass(
@@ -56,6 +135,7 @@ var TriggerRefreshButton = GObject.registerClass(
 			icon_name: 'view-refresh-symbolic',
 			style_class: 'system-status-icon'
 		}));
+
         this.connect('button-press-event', this._trigger_btn.bind(this));
         this.connect('touch-event', this._trigger_touch.bind(this));
     }
@@ -68,6 +148,128 @@ var TriggerRefreshButton = GObject.registerClass(
 
     _trigger_btn(widget, event) {
 		ebc.ebc_trigger_global_refresh();
+    }
+});
+
+
+/* This class defines a button, to be placed in the GNOME top panel, that is
+ * used to switch between various performance/quality modes. Here, we define an
+ * ebc mode as a combination of dclk frequency (either 200 MHz or ca. 250 MHz),
+ * and a DRM display mode.
+ *
+ * The idea here is: Define a "quality" mode that reduces visible artifacts as
+ * much as possible, with the downside of having bad latency. This mode is
+ * intended for high-quality, low-speed, task such as reading or slow web
+ * browsing. It is not intended for writing.
+ *
+ * Another mode is the performance mode. Here, speed is gained at the expense
+ * of visual quality. However, for a lot of scenarios that involve high-speed
+ * writing, a certain of amount of visual glitches can be accepted.
+ *
+ * Note that these ebc modes only relate to the dclk clock (which controls
+ * basically how fast data is sent to the ebc display), and the drm mode, which
+ * (for the m-weigand kernel) controls basically only compositor-related
+ * refresh rates. These modes are independent of the waveforms used!
+ *
+ * For now we differentiate between quality and performance mode by reading the
+ * dclk_select module parameter of the rockchip_ebc kernel module.
+ *
+ * */
+var PerformanceModeButton = GObject.registerClass(
+	class PerformanceModeButton extends PanelMenu.Button {
+    _init() {
+        super._init();
+        this.set_track_hover(true);
+        this.set_reactive(true);
+
+		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+
+		let label_text = 'N'
+		let new_mode = ''
+		if (dclk_select == 0){
+			new_mode = '1872x1404@5.000';
+			label_text = 'Q'
+		} else if (dclk_select == 1) {
+			label_text = 'P'
+			new_mode = '1872x1404@40.000';
+		}
+
+        try {
+            GLib.spawn_async(
+                Me.path,
+                ['gjs', `${Me.path}/mode_switcher.js`, `${new_mode}`],
+                null,
+                GLib.SpawnFlags.SEARCH_PATH,
+                null);
+        } catch (err) {
+            logError(err);
+        }
+
+		this.panel_label = new St.Label({
+			text: label_text,
+        });
+
+        this.add_child(this.panel_label);
+
+        this.connect('button-press-event', this._trigger_btn.bind(this));
+        this.connect('touch-event', this._trigger_touch.bind(this));
+    }
+
+
+    switch_mode() {
+        log('MODE SWITCH');
+		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+		let new_mode = ''
+
+		if (dclk_select == 0){
+			// we are in quality mode and want performance mode
+			log('switching to performance mode');
+			new_mode = '1872x1404@40.000';
+			ebc.PnProxy.SetDclkSelectSync(1);
+			this.panel_label.set_text('P');
+		}
+		else if (dclk_select == 1){
+			log('switching to quality mode');
+			// new_mode = '1872x1404@1.000';
+			new_mode = '1872x1404@5.000';
+			ebc.PnProxy.SetDclkSelectSync(0);
+			this.panel_label.set_text('Q');
+		} else
+			return;
+		log("new mode:");
+		log(new_mode);
+
+        try {
+            GLib.spawn_async(
+                Me.path,
+                ['gjs', `${Me.path}/mode_switcher.js`, `${new_mode}`],
+                null,
+                GLib.SpawnFlags.SEARCH_PATH,
+                null);
+        } catch (err) {
+            logError(err);
+        }
+
+		const removeId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+    		log('This callback will be invoked once after 1 seconds');
+			ebc.ebc_trigger_global_refresh();
+
+    		// GLib.Source.remove(timeoutId);
+
+			return GLib.SOURCE_REMOVE;
+		});
+    }
+
+    _trigger_touch(widget, event) {
+		if (event.type() !== Clutter.EventType.TOUCH_BEGIN){
+			this.switch_mode();
+			// ebc.ebc_trigger_global_refresh();
+		}
+    }
+
+    _trigger_btn(widget, event) {
+		// ebc.ebc_trigger_global_refresh();
+		this.switch_mode();
     }
 });
 
@@ -149,14 +351,6 @@ class Extension {
 		// use the new quicksettings from GNOME 0.43
 		// https://gjs.guide/extensions/topics/quick-settings.html#example-usage
 
-		const file = Gio.file_new_for_path(
-			"/sys/class/backlight/backlight_warm/brightness"
-		);
-		if (!file.query_exists(null)){
-			log("ebc plugin: backlight does not exist");
-			return;
-		}
-
 		const FeatureSlider = GObject.registerClass(
 		class FeatureSlider extends QuickSettings.QuickSlider {
 			_init() {
@@ -166,7 +360,6 @@ class Extension {
 
 				this.filepath = "/sys/class/backlight/backlight_warm/brightness";
 				this.max_filepath = "/sys/class/backlight/backlight_warm/max_brightness";
-
 
 				// set slider to current value
 				this.max_value = this._get_content(this.max_filepath);
@@ -407,6 +600,24 @@ class Extension {
 		);
 	}
 
+	_test_func(){
+		log("TEST function");
+
+		const test_dialog = new USBDialog();
+		test_dialog.open();
+		// let dd = test_dialog.result;
+		// log(`test dialog: ${dd}`);
+	}
+
+	_add_testing_button(){
+		let item;
+		item = new PopupMenu.PopupMenuItem(_('TEST'));
+		item.connect('activate', () => {
+			this._test_func();
+		});
+		this._indicator.menu.addMenuItem(item);
+	}
+
 	_add_waveform_buttons(){
 		let item;
 		item = new PopupMenu.PopupMenuItem(_('A2 Waveform'));
@@ -519,6 +730,16 @@ class Extension {
 		);
 	}
 
+	add_performance_mode_button(){
+		this._performance_mode_button = new PerformanceModeButton();
+		Main.panel.addToStatusArea(
+			"PN Switch Performance Modes",
+			this._performance_mode_button,
+			-1,
+			'center'
+		);
+	}
+
 	add_panel_label(){
 		this.panel_label = new St.Label({
 			text: "DADA",
@@ -537,6 +758,7 @@ class Extension {
         log(`enabling ${Me.metadata.name}`);
 
 		this.add_refresh_button();
+		this.add_performance_mode_button();
 		// this.add_panel_label();
 
 		// ////////////////////////////////////////////////////////////////////
@@ -588,7 +810,8 @@ class Extension {
 		this._add_bw_slider();
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
-		this._add_waveform_buttons()
+		this._add_waveform_buttons();
+	    	this._add_testing_button();
 
 		// activate default grayscale mode
 		this._change_bw_mode(0);
