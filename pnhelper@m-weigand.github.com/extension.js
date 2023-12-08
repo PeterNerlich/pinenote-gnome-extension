@@ -149,6 +149,14 @@ class Extension {
 		// use the new quicksettings from GNOME 0.43
 		// https://gjs.guide/extensions/topics/quick-settings.html#example-usage
 
+		const file = Gio.file_new_for_path(
+			"/sys/class/backlight/backlight_warm/brightness"
+		);
+		if (!file.query_exists(null)){
+			log("ebc plugin: backlight does not exist");
+			return;
+		}
+
 		const FeatureSlider = GObject.registerClass(
 		class FeatureSlider extends QuickSettings.QuickSlider {
 			_init() {
@@ -158,6 +166,7 @@ class Extension {
 
 				this.filepath = "/sys/class/backlight/backlight_warm/brightness";
 				this.max_filepath = "/sys/class/backlight/backlight_warm/max_brightness";
+
 
 				// set slider to current value
 				this.max_value = this._get_content(this.max_filepath);
