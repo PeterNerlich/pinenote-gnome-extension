@@ -1,5 +1,12 @@
-pinenote-gnome-extension (1.0) UNRELEASED; urgency=medium
+pinenote-gnome-extension (1.1) unstable; urgency=medium
+
+  * Add the performance mode button
+  * Update dbus interface for the pinenote-dbus-service
+
+ -- Maximilian Weigand <mweigand@mweigand.net>  Fri, 08 Dec 2023 13:34:49 +0100
+
+pinenote-gnome-extension (1.0) unstable; urgency=medium
 
   * Initial release.
 
- -- Maximilian Weigand <mweigand@koko>  Fri, 02 Jun 2023 13:16:19 +0200
+ -- Maximilian Weigand <mweigand@mweigand.net>  Fri, 08 Dec 2023 13:34:15 +0100

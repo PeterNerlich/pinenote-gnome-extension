@@ -2,7 +2,7 @@
     "uuid": "pnhelper@m-weigand.github.com",
     "name": "Pinenote Helper",
     "description": "Provides easy access to some PineNote-related functionality",
-    "version": 1.0,
+    "version": 1.1,
     "shell-version": ["43" ],
     "url": "https://github.com/PNDeb/pinenote-gnome-extension"
 }
