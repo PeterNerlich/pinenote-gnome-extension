@@ -46,6 +46,7 @@ const Orientation = Object.freeze({
 const BusUtils = Me.imports.busUtils;
 
 const ebc = Me.imports.ebc;
+const usb = Me.imports.usb;
 
 // /////////////////////////////
 //
@@ -238,6 +239,27 @@ var PerformanceModeButton = GObject.registerClass(
 			return;
 		log("new mode:");
 		log(new_mode);
+		try {
+			// The process starts running immediately after this
+			// function is called. Any error thrown here will be a
+			// result of the process failing to start, not the success
+			// or failure of the process itself.
+			let proc = Gio.Subprocess.new(
+				// The program and command options are passed as a list
+				// of arguments
+				['/bin/sh', '-c', `echo 1 > /sys/module/rockchip_ebc/parameters/no_off_screen`],
+					// /sys/module/drm/parameters/debug'],
+
+				// The flags control what I/O pipes are opened and how they are directed
+				Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+			);
+
+			// Once the process has started, you can end it with
+			// `force_exit()`
+			// proc.force_exit();
+		} catch (e) {
+			logError(e);
+		}
 
         try {
             GLib.spawn_async(
@@ -618,6 +640,22 @@ class Extension {
 		this._indicator.menu.addMenuItem(item);
 	}
 
+	_add_usb_mtp_gadget_buttons(){
+		let item;
+		item = new PopupMenu.PopupMenuItem(_('Start USB MTP'));
+		item.connect('activate', () => {
+			usb.PnUSBProxy.usb_gadget_activate_mtpSync();
+		});
+		this._indicator.menu.addMenuItem(item);
+
+		let item2;
+		item2 = new PopupMenu.PopupMenuItem(_('Stop USB MTP'));
+		item2.connect('activate', () => {
+			usb.PnUSBProxy.usb_gadget_disable_mtpSync();
+		});
+		this._indicator.menu.addMenuItem(item2);
+	}
+
 	_add_waveform_buttons(){
 		let item;
 		item = new PopupMenu.PopupMenuItem(_('A2 Waveform'));
@@ -811,7 +849,8 @@ class Extension {
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
 		this._add_waveform_buttons();
-	    	this._add_testing_button();
+		this._add_testing_button();
+		this._add_usb_mtp_gadget_buttons();
 
 		// activate default grayscale mode
 		this._change_bw_mode(0);
