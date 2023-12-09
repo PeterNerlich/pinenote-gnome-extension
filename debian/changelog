@@ -1,3 +1,10 @@
+pinenote-gnome-extension (1.2) unstable; urgency=medium
+
+  * Add very simple USB MTP activation/deactivation modes (requires updated
+    pinenote-dbus-service and umtp-responder >= 1.6.2
+
+ -- Maximilian Weigand <mweigand@mweigand.net>  Sat, 09 Dec 2023 20:31:10 +0000
+
 pinenote-gnome-extension (1.1) unstable; urgency=medium
 
   * Add the performance mode button
