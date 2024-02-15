@@ -319,8 +319,6 @@ class Extension {
 
 		const home = GLib.getenv("HOME");
 		const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
-		log("checking file");
-		log(file);
 		if (file.query_exists(null)){
 			log("disabling overview");
 			Main.sessionMode.hasOverview = false;
@@ -372,6 +370,13 @@ class Extension {
     _add_warm_indicator_to_main_gnome_menu() {
 		// use the new quicksettings from GNOME 0.43
 		// https://gjs.guide/extensions/topics/quick-settings.html#example-usage
+		//
+		let brightness_file "/sys/class/backlight/backlight_warm/brightness";
+		const file = Gio.file_new_for_path(brightness_file);
+		if (!file.query_exists(null)){
+			log("No warm backlight control found - will not add slider for that");
+			return;
+		}
 
 		const FeatureSlider = GObject.registerClass(
 		class FeatureSlider extends QuickSettings.QuickSlider {
