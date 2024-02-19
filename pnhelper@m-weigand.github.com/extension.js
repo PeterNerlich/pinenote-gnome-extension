@@ -371,7 +371,7 @@ class Extension {
 		// use the new quicksettings from GNOME 0.43
 		// https://gjs.guide/extensions/topics/quick-settings.html#example-usage
 		//
-		let brightness_file "/sys/class/backlight/backlight_warm/brightness";
+		let brightness_file = "/sys/class/backlight/backlight_warm/brightness";
 		const file = Gio.file_new_for_path(brightness_file);
 		if (!file.query_exists(null)){
 			log("No warm backlight control found - will not add slider for that");
