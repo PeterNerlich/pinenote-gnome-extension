@@ -1,3 +1,10 @@
+pinenote-gnome-extension (1.3) unstable; urgency=medium
+
+  * Enable extension for Gnome 44
+  * Hopefully also fix for the Quartz64-a
+
+ -- Maximilian Weigand (PineNote Signing Key 3) <mweigand@mweigand.net>  Mon, 19 Feb 2024 20:09:47 +0100
+
 pinenote-gnome-extension (1.2) unstable; urgency=medium
 
   * Add very simple USB MTP activation/deactivation modes (requires updated
