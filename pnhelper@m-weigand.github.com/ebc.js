@@ -5,7 +5,7 @@ const GLib = imports.gi.GLib;
 
 // regenerate with
 // dbus-send --system --print-reply --dest=org.pinenote.ebc /ebc org.freedesktop.DBus.Introspectable.Introspect
-// make sure to fix the <node> tag and remove the "name"
+// make sure to fix the <node> tag by removing the "name="..." property
 const PinenoteDbusInterface = `
 <node>
   <interface name="org.pinenote.ebc">

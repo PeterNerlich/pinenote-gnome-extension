@@ -47,6 +47,7 @@ const BusUtils = Me.imports.busUtils;
 
 const ebc = Me.imports.ebc;
 const usb = Me.imports.usb;
+const btpen = Me.imports.btpen;
 
 // /////////////////////////////
 //
@@ -195,6 +196,9 @@ var PerformanceModeButton = GObject.registerClass(
 			new_mode = '1872x1404@40.000';
 		}
 
+		// disable trying to fix the mode on initialization
+		// this only throws an exception
+		/*
         try {
             GLib.spawn_async(
                 Me.path,
@@ -205,6 +209,7 @@ var PerformanceModeButton = GObject.registerClass(
         } catch (err) {
             logError(err);
         }
+		*/
 
 		this.panel_label = new St.Label({
 			text: label_text,
@@ -853,12 +858,14 @@ class Extension {
 		this._add_bw_slider();
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
-		this._add_waveform_buttons();
+		// this._add_waveform_buttons();
 		this._add_testing_button();
 		this._add_usb_mtp_gadget_buttons();
 
 		// activate default grayscale mode
 		this._change_bw_mode(0);
+
+		// this._btpen = new btpen.Indicator_ng();
     }
 
 	_get_content(sysfs_file){
