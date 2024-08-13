@@ -4,13 +4,25 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Indicator */
 
-const {Gio, GLib, GnomeBluetooth, GObject, Pango, St} = imports.gi;
-const Main = imports.ui.main;
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import GObject from 'gi://GnomeBluetoth';
+import GObject from 'gi://Pango';
+import GObject from 'gi://St';
+// const {Gio, GLib, GnomeBluetooth, GObject, Pango, St} = imports.gi;
+// const Main = imports.ui.main;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-const {Spinner} = imports.ui.animation;
-const PopupMenu = imports.ui.popupMenu;
-const {QuickToggle, QuickMenuToggle, SystemIndicator} = imports.ui.quickSettings;
+// const {Spinner} = imports.ui.animation;
+import {Spinner} from 'resource:///org/gnome/shell/ui/animation.js';
+// const PopupMenu = imports.ui.popupMenu;
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+// const {QuickToggle, QuickMenuToggle, SystemIndicator} = imports.ui.quickSettings;
+import {QuickToggle, QuickMenuToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
+
 // This is the live instance of the Quick Settings menu
+// TODO
 const QuickSettingsMenu = imports.ui.main.panel.statusArea.quickSettings;
 
 const {loadInterfaceXML} = imports.misc.fileUtils;
