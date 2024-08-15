@@ -215,11 +215,15 @@ var PerformanceModeButton = GObject.registerClass(
 		let label_text = 'N'
 		let new_mode = ''
 		if (dclk_select == 0){
+			console.log("Quality mode");
+			console.log("Switching to 5 Hz refresh rate");
 			new_mode = '1872x1404@5.000';
 			label_text = 'Q'
 		} else if (dclk_select == 1) {
 			label_text = 'P'
-			new_mode = '1872x1404@40.000';
+			console.log("Performance mode");
+			console.log("Switching to 80 Hz refresh rate");
+			new_mode = '1872x1404@80.000';
 		}
 
 		// disable trying to fix the mode on initialization
