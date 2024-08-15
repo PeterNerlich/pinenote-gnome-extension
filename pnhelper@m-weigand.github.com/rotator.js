@@ -18,13 +18,11 @@
  *
  * https://raw.githubusercontent.com/kosmospredanie/gnome-shell-extension-screen-autorotate/main/screen-autorotate%40kosmospredanie.yandex.ru/rotator.js
  */
+// 'use strict';
+import Gio from 'gi://Gio';
+import * as BusUtils from './busUtils.js';
 
-'use strict';
-
-const { Gio } = imports.gi;
-
-imports.searchPath.unshift('.');
-const BusUtils = imports.busUtils;
+// 'use strict';
 
 function call_dbus_method(method, params = null) {
     let connection = Gio.bus_get_sync(Gio.BusType.SESSION, null);
@@ -46,7 +44,7 @@ function get_state() {
 }
 
 function rotate_to(transform) {
-    let state = this.get_state();
+    let state = get_state();
     let builtin_monitor = state.builtin_monitor;
     let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
     logical_monitor.transform = transform;
@@ -56,7 +54,7 @@ function rotate_to(transform) {
 	log("rotation done");
 }
 
-let state = this.get_state();
+let state = get_state();
 let builtin_monitor = state.builtin_monitor;
 let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
 log("current monitor state:");

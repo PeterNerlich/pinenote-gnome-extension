@@ -1,7 +1,9 @@
 // rockchip-usb functions, mainly communicating with the dbus service for the
 // Pinenote
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+// const Gio = imports.gi.Gio;
+// const GLib = imports.gi.GLib;
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 
 // regenerate with
 // dbus-send --system --print-reply --dest=org.pinenote.usb /usb org.freedesktop.DBus.Introspectable.Introspect
@@ -22,7 +24,7 @@ const PinenoteUSBDbusInterface = `
 
 const PinenoteUSBDbusProxy = Gio.DBusProxy.makeProxyWrapper(PinenoteUSBDbusInterface);
 
-var PnUSBProxy = new PinenoteUSBDbusProxy(
+export var PnUSBProxy = new PinenoteUSBDbusProxy(
     Gio.DBus.system,
     "org.pinenote.usb",
     "/usb",

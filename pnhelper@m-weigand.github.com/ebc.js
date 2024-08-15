@@ -1,7 +1,9 @@
 // rockchip-ebc functions, mainly communicating with the dbus service for the
 // Pinenote
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+// const Gio = imports.gi.Gio;
+// const GLib = imports.gi.GLib;
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 // regenerate with
 // dbus-send --system --print-reply --dest=org.pinenote.ebc /ebc org.freedesktop.DBus.Introspectable.Introspect
@@ -56,17 +58,17 @@ const PinenoteDbusInterface = `
 
 const PinenoteDbusProxy = Gio.DBusProxy.makeProxyWrapper(PinenoteDbusInterface);
 
-var PnProxy = new PinenoteDbusProxy(
+export var PnProxy = new PinenoteDbusProxy(
     Gio.DBus.system,
     "org.pinenote.ebc",
     "/ebc",
 );
 
-function ebc_trigger_global_refresh(){
+export function ebc_trigger_global_refresh(){
 	PnProxy.TriggerGlobalRefreshSync();
 }
 
-function ebc_subscribe_to_waveformchanged(func, widget){
+export function ebc_subscribe_to_waveformchanged(func, widget){
 	function func_signal (connection, sender, path, iface, signal, params){
 		func(connection, sender, path, iface, signal, params, widget);
 	}
@@ -78,7 +80,7 @@ function ebc_subscribe_to_waveformchanged(func, widget){
 
 // the pinenote-dbus-service can emit a signal which indicates that a
 // performance-mode-change was requested
-function ebc_subscribe_to_requestperformancemode(func, widget){
+export function ebc_subscribe_to_requestperformancemode(func, widget){
 	function func_signal (connection, sender, path, iface, signal, params){
 		func(connection, sender, path, iface, signal, params, widget);
 	}
@@ -89,6 +91,6 @@ function ebc_subscribe_to_requestperformancemode(func, widget){
 }
 
 //Disconnect from the dbus signal when the extension is stopped
-function ebc_unsubscribe(dbus_handler){
+export function ebc_unsubscribe(dbus_handler){
   PnProxy.disconnectSignal(dbus_handler);
 }

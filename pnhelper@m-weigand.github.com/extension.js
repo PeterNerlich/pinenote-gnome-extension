@@ -18,23 +18,55 @@
  * Based on:
  * https://raw.githubusercontent.com/kosmospredanie/gnome-shell-extension-screen-autorotate/main/screen-autorotate%40kosmospredanie.yandex.ru/extension.js
  */
-'use strict';
+import St from 'gi://St';
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Gio from 'gi://Gio';
 
-const St = imports.gi.St;
-const { Clutter, GLib, Gio, GObject } = imports.gi;
-const QuickSettings = imports.ui.quickSettings;
+import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
+// const St = imports.gi.St;
+// const { Clutter, GLib, Gio, GObject } = imports.gi;
+// const QuickSettings = imports.ui.quickSettings;
 
 // This is the live instance of the Quick Settings menu
-const QuickSettingsMenu = imports.ui.main.panel.statusArea.quickSettings;
+// const QuickSettingsMenu = imports.ui.main.panel.statusArea.quickSettings;
+import {QuickSettingsMenu} from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Slider = imports.ui.slider;
+// TODO
+// const ExtensionUtils = imports.misc.extensionUtils;
 
-const ModalDialog = imports.ui.modalDialog;
+// TODO
+// const Me = ExtensionUtils.getCurrentExtension();
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+// const Main = imports.ui.main;
+
+//const PanelMenu = imports.ui.panelMenu;
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+// const PopupMenu = imports.ui.popupMenu;
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+// const Slider = imports.ui.slider;
+import * as Slider from 'resource:///org/gnome/shell/ui/slider.js';
+
+// const ModalDialog = imports.ui.modalDialog;
+import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
+
+import {Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
+
+// const BusUtils = Me.imports.busUtils;
+import * as BusUtils from './busUtils.js';
+
+// const ebc = Me.imports.ebc;
+// const usb = Me.imports.usb;
+// const btpen = Me.imports.btpen;
+
+import * as ebc from './ebc.js';
+import * as usb from './usb.js';
+//import * as display_rotator from './rotator.js';
+// import * as btpen from './btpen.js';
+
+// 'use strict';
 
 const Orientation = Object.freeze({
     'normal': 0,
@@ -42,12 +74,6 @@ const Orientation = Object.freeze({
     'bottom-up': 2,
     'right-up': 3
 });
-
-const BusUtils = Me.imports.busUtils;
-
-const ebc = Me.imports.ebc;
-const usb = Me.imports.usb;
-const btpen = Me.imports.btpen;
 
 // /////////////////////////////
 //
@@ -270,8 +296,8 @@ var PerformanceModeButton = GObject.registerClass(
 
         try {
             GLib.spawn_async(
-                Me.path,
-                ['gjs', `${Me.path}/mode_switcher.js`, `${new_mode}`],
+                this.metadata.path,
+                ['gjs', `${this.metadata.path}/mode_switcher.js`, `${new_mode}`],
                 null,
                 GLib.SpawnFlags.SEARCH_PATH,
                 null);
@@ -329,7 +355,7 @@ var WarmSlider = GObject.registerClass(
 			this._onSettingsChanged();
 
 			// Set an accessible name for the slider
-			this.slider.accessible_name = "Warm Backlight Brightness";
+			this.slider.accessible_name = _("Warm Backlight Brightness");
 		}
 
 		_onSettingsChanged() {
@@ -389,38 +415,49 @@ var QuickSettingsWarmSlider = GObject.registerClass(
 	class FeatureIndicator extends QuickSettings.SystemIndicator {
 		_init() {
 			super._init();
+			console.log("pnhelper: QuickSettingsWarmSlider init");
 
-			// Create the slider and associate it with the indicator, being sure to
-			// destroy it along with the indicator
-			this.quickSettingsItems.push(new WarmSlider);
+			// Create the slider and associate it with the indicator, being
+			// sure to destroy it along with the indicator
+			this.quickSettingsItems.push(new WarmSlider());
 
 			this.connect('destroy', () => {
 				this.quickSettingsItems.forEach(item => item.destroy());
 			});
 
 			// Add the indicator to the panel
-			QuickSettingsMenu._indicators.add_child(this);
+			// TODO
+			// QuickSettingsMenu._indicators.add_child(this);
 
 			// Add the slider to the menu, this time passing `2` as the second
 			// argument to ensure the slider spans both columns of the menu
-			QuickSettingsMenu._addItems(this.quickSettingsItems, 2);
+			// TODO
+			// QuickSettingsMenu._addItems(this.quickSettingsItems, 2);
 
 			// Move the slider from the bottom to be with the cool light slider
-			for (const item of this.quickSettingsItems) {
-				QuickSettingsMenu.menu._grid.set_child_below_sibling(
-					item,
-					QuickSettingsMenu._brightness.quickSettingsItems[0]
-				);
-			}
+			// TODO
+			// for (const item of this.quickSettingsItems) {
+			// 	QuickSettingsMenu.menu._grid.set_child_below_sibling(
+			// 		item,
+			// 		QuickSettingsMenu._brightness.quickSettingsItems[0]
+			// 	);
+			// }
 		}
 });
 
-class Extension {
-    constructor() {
+
+// This class defines the actual extension
+// See:
+// https://gjs.guide/extensions/topics/extension.html
+export default class PnHelperExtension extends Extension {
+    constructor(metadata) {
+		super(metadata);
         this._indicator = null;
         this._indicator2 = null;
 
 		const home = GLib.getenv("HOME");
+		// sometimes (on first boot), we do not want the overview to be shown.
+		// We want to directly go to the auto-started applications
 		const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
 		if (file.query_exists(null)){
 			log("disabling overview");
@@ -564,10 +601,12 @@ class Extension {
 	}
 
 	_add_bw_slider() {
+		console.log("pnhelper: adding bw slider");
 		this.m_bw_slider = new PopupMenu.PopupBaseMenuItem({ activate: true });
 		this._indicator.menu.addMenuItem(this.m_bw_slider);
 
         this._bw_slider = new Slider.Slider(0.5);
+
         this._sliderChangedId = this._bw_slider.connect('notify::value',
             this._bw_slider_changed.bind(this));
         this._bw_slider.accessible_name = _("BW Threshold");
@@ -576,7 +615,7 @@ class Extension {
             icon_name: 'display-brightness-symbolic',
             style_class: 'popup-menu-icon',
         });
-        this.m_bw_slider.add(icon);
+        this.m_bw_slider.add_child(icon);
         this.m_bw_slider.add_child(this._bw_slider);
         this.m_bw_slider.connect('button-press-event', (actor, event) => {
             return this._bw_slider.startDragging(event);
@@ -782,11 +821,28 @@ class Extension {
 			return;
 		}
 		// initialize a new slider object
-		this._indicator2 = new QuickSettingsWarmSlider;
+		// https://gjs.guide/extensions/topics/quick-settings.html
+		this._indicator2 = new QuickSettingsWarmSlider();
+		Main.panel.statusArea.quickSettings.addExternalIndicator(
+			this._indicator2,
+			2  // spawn two columns
+		);
+		// GLib.usleep(200000);
+		// approach 2: directly insert the slider at the correct position
+		// I think this fails because the other items are inserted
+		// asynchronously
+		// see ui/panel.js, line 622
+		// let sibling = Main.panel.statusArea.quickSettings._brightness;
+		// console.log(sibling);
+		// console.log(Main.panel.statusArea.quickSettings._indicators);
+		// Main.panel.statusArea.quickSettings._indicators.insert_child_below(
+		// 	this._indicator2,
+		// 	sibling
+		// );
     }
 
     enable() {
-        log(`enabling ${Me.metadata.name}`);
+        log(`enabling ${this.metadata.name}`);
 
 		this.add_refresh_button();
 		this.add_performance_mode_button();
@@ -796,7 +852,7 @@ class Extension {
 		this._topBox = new St.BoxLayout({ });
 
 		// Button 1
-        let indicatorName = `${Me.metadata.name} Indicator`;
+        let indicatorName = `${this.metadata.name} Indicator`;
 
         // Create a panel button
         this._indicator = new PanelMenu.Button(0.0, indicatorName, false);
@@ -809,7 +865,8 @@ class Extension {
         });
         // this._indicator.add_child(icon);
 
-		this._topBox.add(icon);
+		// TODO
+		this._topBox.add_child(icon);
 
 		this.panel_label = new St.Label({
 			text: "DADA",
@@ -818,7 +875,10 @@ class Extension {
         });
 		// Add the label
         // this._indicator.add_child(this.panel_label);
-		this.dbus_proxy = ebc.ebc_subscribe_to_waveformchanged(this.onWaveformChanged, this.panel_label);
+		this.dbus_proxy = ebc.ebc_subscribe_to_waveformchanged(
+			this.onWaveformChanged,
+			this.panel_label
+		);
 
         this._topBox.add_child(this.panel_label);
         this._indicator.add_child(this._topBox);
@@ -868,7 +928,7 @@ class Extension {
     // REMINDER: It's required for extensions to clean up after themselves when
     // they are disabled. This is required for approval during review!
     disable() {
-        log(`disabling ${Me.metadata.name}`);
+        log(`disabling ${this.metadata.name}`);
 
 		ebc.ebc_unsubscribe(this.dbus_proxy)
 
@@ -896,11 +956,12 @@ class Extension {
 
 	rotate_to(orientation) {
         log('Rotate screen to ' + orientation);
+		// display_rotator.toggle();
         let target = Orientation[orientation];
         try {
             GLib.spawn_async(
-                Me.path,
-                ['gjs', `${Me.path}/rotator.js`, `${target}`],
+                this.metadata.path,
+                ['gjs', '-m', `${this.metadata.path}/rotator.js`, `${target}`],
                 null,
                 GLib.SpawnFlags.SEARCH_PATH,
                 null);
@@ -912,7 +973,7 @@ class Extension {
 
 
 function init() {
-    log(`initializing ${Me.metadata.name}`);
+    log(`initializing ${this.metadata.name}`);
 
     return new Extension();
 }

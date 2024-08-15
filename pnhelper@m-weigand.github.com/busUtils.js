@@ -23,12 +23,13 @@
  *
  * https://github.com/GNOME/mutter/blob/b5f99bd12ebc483e682e39c8126a1b51772bc67d/data/dbus-interfaces/org.gnome.Mutter.DisplayConfig.xml
  */
-
 'use strict';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
-const { GLib, Gio } = imports.gi;
+//const { GLib, Gio } = imports.gi;
 
-var Methods = Object.freeze({
+export var Methods = Object.freeze({
     'verify': 0,
     'temporary': 1,
     'persistent': 2
@@ -36,7 +37,7 @@ var Methods = Object.freeze({
 
 // Note: the dbus response consists of a lot of nested js tuples, hence the
 // unpack()s
-var Monitor = class Monitor {
+export var Monitor = class Monitor {
     constructor(variant) {
         let unpacked = variant.unpack();
         this.connector = unpacked[0].unpack()[0].unpack();
@@ -78,7 +79,7 @@ var Monitor = class Monitor {
     }
 }
 
-var LogicalMonitor = class LogicalMonitor {
+export var LogicalMonitor = class LogicalMonitor {
     constructor(variant) {
         let unpacked = variant.unpack();
         this.x = unpacked[0].unpack();
@@ -95,7 +96,7 @@ var LogicalMonitor = class LogicalMonitor {
     }
 }
 
-var DisplayConfigState = class DisplayConfigState {
+export var DisplayConfigState = class DisplayConfigState {
     constructor(result) {
         let unpacked = result.unpack();
 
