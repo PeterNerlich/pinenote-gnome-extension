@@ -1,3 +1,9 @@
+pinenote-gnome-extension (1.4) trixie; urgency=medium
+
+  * This release is for Gnome 46 only
+
+ -- Maximilian Weigand (PineNote Signing Key 4) <mweigand@mweigand.net>  Thu, 15 Aug 2024 19:47:28 +0200
+
 pinenote-gnome-extension (1.3) unstable; urgency=medium
 
   * Enable extension for Gnome 44
