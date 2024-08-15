@@ -5,7 +5,7 @@ const GLib = imports.gi.GLib;
 
 // regenerate with
 // dbus-send --system --print-reply --dest=org.pinenote.ebc /ebc org.freedesktop.DBus.Introspectable.Introspect
-// make sure to fix the <node> tag and remove the "name"
+// make sure to fix the <node> tag by removing the "name="..." property
 const PinenoteDbusInterface = `
 <node>
   <interface name="org.pinenote.ebc">
@@ -70,9 +70,10 @@ function ebc_subscribe_to_waveformchanged(func, widget){
 	function func_signal (connection, sender, path, iface, signal, params){
 		func(connection, sender, path, iface, signal, params, widget);
 	}
-	PnProxy.connectSignal(
+	const ebc_dbus = PnProxy.connectSignal(
 		"WaveformChanged", func_signal
 	);
+  return(ebc_dbus);
 }
 
 // the pinenote-dbus-service can emit a signal which indicates that a
@@ -81,7 +82,13 @@ function ebc_subscribe_to_requestperformancemode(func, widget){
 	function func_signal (connection, sender, path, iface, signal, params){
 		func(connection, sender, path, iface, signal, params, widget);
 	}
-	PnProxy.connectSignal(
+	const ebc_dbus = PnProxy.connectSignal(
 		"ReqQualityOrPerformance", func_signal
 	);
+  return(ebc_dbus);
+}
+
+//Disconnect from the dbus signal when the extension is stopped
+function ebc_unsubscribe(dbus_handler){
+  PnProxy.disconnectSignal(dbus_handler);
 }
