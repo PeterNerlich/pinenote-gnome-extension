@@ -23,7 +23,6 @@
  *
  * https://github.com/GNOME/mutter/blob/b5f99bd12ebc483e682e39c8126a1b51772bc67d/data/dbus-interfaces/org.gnome.Mutter.DisplayConfig.xml
  */
-'use strict';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 

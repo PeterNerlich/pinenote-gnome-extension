@@ -1,4 +1,3 @@
-#!/usr/bin/env gjs
 /* mode_switcher.js
  * based upon rotator.js
  *
@@ -20,12 +19,9 @@
  * https://raw.githubusercontent.com/kosmospredanie/gnome-shell-extension-screen-autorotate/main/screen-autorotate%40kosmospredanie.yandex.ru/rotator.js
  */
 
-'use strict';
-
 const { Gio } = imports.gi;
+import * as BusUtils from "./busUtils.js";
 
-imports.searchPath.unshift('.');
-const BusUtils = imports.busUtils;
 
 function call_dbus_method(method, params = null) {
     let connection = Gio.bus_get_sync(Gio.BusType.SESSION, null);
@@ -58,7 +54,7 @@ function rotate_to(transform) {
 }
 
 function switch_mode(new_mode) {
-    let state = this.get_state();
+    let state = get_state();
     let builtin_monitor = state.builtin_monitor;
     let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
 	// builtin_monitor.current_mode_id = '1872x1404@20.000';

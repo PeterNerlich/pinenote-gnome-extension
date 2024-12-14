@@ -205,15 +205,18 @@ var TriggerRefreshButton = GObject.registerClass(
  * */
 var PerformanceModeButton = GObject.registerClass(
 	class PerformanceModeButton extends PanelMenu.Button {
-    _init() {
+    _init(metadata) {
         super._init();
         this.set_track_hover(true);
         this.set_reactive(true);
+	this.metadata = metadata;
 
 		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
 
 		let label_text = 'N'
 		let new_mode = ''
+		// set mode (i.e., refresh rate) according to the dclk_select
+	        // value
 		if (dclk_select == 0){
 			console.log("Quality mode");
 			console.log("Switching to 5 Hz refresh rate");
@@ -262,7 +265,7 @@ var PerformanceModeButton = GObject.registerClass(
 		if (dclk_select == 0){
 			// we are in quality mode and want performance mode
 			log('switching to performance mode');
-			new_mode = '1872x1404@40.000';
+			new_mode = '1872x1404@80.000';
 			ebc.PnProxy.SetDclkSelectSync(1);
 			this.panel_label.set_text('P');
 		}
@@ -301,7 +304,7 @@ var PerformanceModeButton = GObject.registerClass(
         try {
             GLib.spawn_async(
                 this.metadata.path,
-                ['gjs', `${this.metadata.path}/mode_switcher.js`, `${new_mode}`],
+                ['gjs', '-m', `${this.metadata.path}/mode_switcher.js`, `${new_mode}`],
                 null,
                 GLib.SpawnFlags.SEARCH_PATH,
                 null);
@@ -805,7 +808,7 @@ export default class PnHelperExtension extends Extension {
 	}
 
 	add_performance_mode_button(){
-		this._performance_mode_button = new PerformanceModeButton();
+		this._performance_mode_button = new PerformanceModeButton(this.metadata);
 		Main.panel.addToStatusArea(
 			"PN Switch Performance Modes",
 			this._performance_mode_button,
