@@ -1,3 +1,9 @@
+pinenote-gnome-extension (1.6) trixie; urgency=medium
+
+  * Fix mode switching on newer gnome versions
+
+ -- Maximilian Weigand <mweigand@mweigand.net>  Sat, 14 Dec 2024 21:51:29 +0100
+
 pinenote-gnome-extension (1.5) trixie; urgency=medium
 
   * Enable support for GNOME 47
