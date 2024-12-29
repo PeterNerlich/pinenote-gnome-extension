@@ -279,6 +279,7 @@ var PerformanceModeButton = GObject.registerClass(
 			return;
 		log("new mode:");
 		log(new_mode);
+		/*
 		try {
 			// The process starts running immediately after this
 			// function is called. Any error thrown here will be a
@@ -300,6 +301,7 @@ var PerformanceModeButton = GObject.registerClass(
 		} catch (e) {
 			logError(e);
 		}
+		*/
 
         try {
             GLib.spawn_async(
@@ -848,6 +850,44 @@ export default class PnHelperExtension extends Extension {
 		// );
     }
 
+	_add_off_screen_button(){
+		console.log("pnhelper: adding off screen button");
+		this.mitem_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
+		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
+		let off_screen = this._get_content(filename);
+
+		if(off_screen == 'N'){
+			this.mitem_off_screen.label.set_text('Clear Screen on Suspend');
+		} else {
+			this.mitem_off_screen.label.set_text('Keep screen on Suspend');
+		}
+		this.mitem_off_screen.connect('activate', () => {
+			this.toggle_off_screen();
+		});
+
+		this._indicator.menu.addMenuItem(this.mitem_off_screen);
+	}
+
+	toggle_off_screen(){
+		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
+		let off_screen = this._get_content(filename);
+		log(`Toggling no off screen (is: ${off_screen})`);
+
+		if(off_screen == 'N'){
+			off_screen = 1;
+			this.mitem_off_screen.label.set_text('Keep screen on Suspend');
+		} else {
+			off_screen = 0;
+			this.mitem_off_screen.label.set_text('Clear Screen on Suspend');
+		}
+		log(`new value: ${off_screen})`);
+
+		this._write_to_sysfs_file(
+			filename,
+			off_screen
+		);
+	}
+
     enable() {
         log(`enabling ${this.metadata.name}`);
 
@@ -915,6 +955,7 @@ export default class PnHelperExtension extends Extension {
 		this._add_waveform_buttons();
 		this._add_testing_button();
 		this._add_usb_mtp_gadget_buttons();
+		this._add_off_screen_button();
 
 		// activate default grayscale mode
 		this._change_bw_mode(0);
