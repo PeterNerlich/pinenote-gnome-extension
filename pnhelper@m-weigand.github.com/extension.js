@@ -207,11 +207,12 @@ var TriggerRefreshButton = GObject.registerClass(
  * */
 var PerformanceModeButton = GObject.registerClass(
 	class PerformanceModeButton extends PanelMenu.Button {
-    _init(metadata) {
+    _init(metadata, settings) {
         super._init();
         this.set_track_hover(true);
         this.set_reactive(true);
-	this.metadata = metadata;
+		this.metadata = metadata;
+        this._settings = settings;
 
 		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
 
@@ -281,7 +282,8 @@ var PerformanceModeButton = GObject.registerClass(
 			return;
 		log("new mode:");
 		log(new_mode);
-		/*
+
+		const no_off_screen = this._settings.get_boolean('no-off-screen') ? 1 : 0;
 		try {
 			// The process starts running immediately after this
 			// function is called. Any error thrown here will be a
@@ -290,7 +292,7 @@ var PerformanceModeButton = GObject.registerClass(
 			let proc = Gio.Subprocess.new(
 				// The program and command options are passed as a list
 				// of arguments
-				['/bin/sh', '-c', `echo 1 > /sys/module/rockchip_ebc/parameters/no_off_screen`],
+				['/bin/sh', '-c', `echo ${no_off_screen} > /sys/module/rockchip_ebc/parameters/no_off_screen`],
 					// /sys/module/drm/parameters/debug'],
 
 				// The flags control what I/O pipes are opened and how they are directed
@@ -303,7 +305,6 @@ var PerformanceModeButton = GObject.registerClass(
 		} catch (e) {
 			logError(e);
 		}
-		*/
 
         try {
             GLib.spawn_async(
@@ -465,6 +466,7 @@ export default class PnHelperExtension extends Extension {
 		super(metadata);
         this._indicator = null;
         this._indicator2 = null;
+        this._settings = null;
 
 		const home = GLib.getenv("HOME");
 		// sometimes (on first boot), we do not want the overview to be shown.
@@ -474,6 +476,11 @@ export default class PnHelperExtension extends Extension {
 			log("disabling overview");
 			Main.sessionMode.hasOverview = false;
 		}
+
+		this._settings = this.getSettings();
+		this._settings.connect('changed::no-off-screen', (settings, key) => {
+			this._apply_no_off_screen(this._settings.get_boolean(key));
+		});
     }
 
 	onWaveformChanged(connection, sender, path, iface, signal, params, widget) {
@@ -815,7 +822,7 @@ export default class PnHelperExtension extends Extension {
 	}
 
 	_add_performance_mode_button(){
-		this._performance_mode_button = new PerformanceModeButton(this.metadata);
+		this._performance_mode_button = new PerformanceModeButton(this.metadata, this._settings);
 		Main.panel.addToStatusArea(
 			"PN Switch Performance Modes",
 			this._performance_mode_button,
@@ -862,41 +869,49 @@ export default class PnHelperExtension extends Extension {
 		);
 	}
 
-	_add_off_screen_button(){
+	_add_no_off_screen_button(){
 		console.log("pnhelper: adding off screen button");
-		this.mitem_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
+		this.mitem_no_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
 		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
 		let off_screen = this._get_content(filename);
 
 		if(off_screen == 'N'){
-			this.mitem_off_screen.label.set_text('Clear Screen on Suspend');
+			this.mitem_no_off_screen.label.set_text('Clear Screen on Suspend');
 		} else {
-			this.mitem_off_screen.label.set_text('Keep screen on Suspend');
+			this.mitem_no_off_screen.label.set_text('Keep screen on Suspend');
 		}
-		this.mitem_off_screen.connect('activate', () => {
-			this.toggle_off_screen();
+		this.mitem_no_off_screen.connect('activate', () => {
+			this.toggle_no_off_screen();
 		});
 
-		this._indicator.menu.addMenuItem(this.mitem_off_screen);
+		this._indicator.menu.addMenuItem(this.mitem_no_off_screen);
 	}
 
-	toggle_off_screen(){
+	toggle_no_off_screen(){
 		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
-		let off_screen = this._get_content(filename);
-		log(`Toggling no off screen (is: ${off_screen})`);
+		let no_off_screen = this._get_content(filename);
+		log(`Toggling no off screen (is: ${no_off_screen})`);
 
-		if(off_screen == 'N'){
-			off_screen = 1;
-			this.mitem_off_screen.label.set_text('Keep screen on Suspend');
+		if(no_off_screen == 'N'){
+			no_off_screen = true;
+			this.mitem_no_off_screen.label.set_text('Keep screen on Suspend');
 		} else {
-			off_screen = 0;
-			this.mitem_off_screen.label.set_text('Clear Screen on Suspend');
+			no_off_screen = false;
+			this.mitem_no_off_screen.label.set_text('Clear Screen on Suspend');
 		}
-		log(`new value: ${off_screen})`);
+		log(`new value: ${no_off_screen}`);
+
+		this._settings.set_boolean('no-off-screen', no_off_screen);
+	}
+
+	_apply_no_off_screen(value) {
+		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
+		const no_off_screen = value ? 1 : 0;
+		log(`Setting no off screen to ${no_off_screen}`);
 
 		this._write_to_sysfs_file(
 			filename,
-			off_screen
+			no_off_screen
 		);
 	}
 
@@ -961,16 +976,21 @@ export default class PnHelperExtension extends Extension {
 		});
 		this._indicator.menu.addMenuItem(item);
 
+		this._settings = this.getSettings();
+        this._settings.connect('changed::no-off-screen', (settings, key) => {
+            this._apply_no_off_screen(this._settings.get_boolean(key));
+        });
+
 		this._add_bw_buttons();
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
 		// this._add_waveform_buttons();
 		// this._add_testing_button();
 		this._add_usb_mtp_gadget_buttons();
-		this._add_off_screen_button();
+		this._add_no_off_screen_button();
 
 		// activate default grayscale mode
-		this._change_bw_mode(0);
+		//this._change_bw_mode(0);
 
 		// this._btpen = new btpen.Indicator_ng();
     }
@@ -1007,6 +1027,8 @@ export default class PnHelperExtension extends Extension {
 		this._indicator_travel_mode.quickSettingsItems.forEach(item => item.destroy());
 		this._indicator_travel_mode.destroy();
 		this._indicator_travel_mode = null;
+
+        this._settings = null;
     }
 
 	rotate_screen(){
