@@ -213,6 +213,7 @@ var PerformanceModeButton = GObject.registerClass(
         this.set_reactive(true);
 		this.metadata = metadata;
         this._settings = settings;
+		console.log(`PerformanceModeButton initializing with settings: ${this._settings}`);
 
 		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
 
@@ -283,6 +284,7 @@ var PerformanceModeButton = GObject.registerClass(
 		log("new mode:");
 		log(new_mode);
 
+		console.log(`PerformanceModeButton.switch_mode() with settings: ${this._settings}`);
 		const no_off_screen = this._settings.get_boolean('no-off-screen') ? 1 : 0;
 		try {
 			// The process starts running immediately after this
