@@ -924,8 +924,8 @@ export default class PnHelperExtension extends Extension {
 		this._add_bw_buttons();
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
-		this._add_waveform_buttons();
-		this._add_testing_button();
+		// this._add_waveform_buttons();
+		// this._add_testing_button();
 		this._add_usb_mtp_gadget_buttons();
 
 		// activate default grayscale mode
