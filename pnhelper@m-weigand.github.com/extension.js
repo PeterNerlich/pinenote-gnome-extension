@@ -258,6 +258,8 @@ var PerformanceModeButton = GObject.registerClass(
 
         this.connect('button-press-event', this._trigger_btn.bind(this));
         this.connect('touch-event', this._trigger_touch.bind(this));
+
+        this.update_label()
     }
 
 
@@ -271,42 +273,22 @@ var PerformanceModeButton = GObject.registerClass(
 			log('switching to performance mode');
 			new_mode = '1872x1404@80.000';
 			ebc.PnProxy.SetDclkSelectSync(1);
-			this.panel_label.set_text('P');
+			//this.panel_label.set_text('P');
 		}
 		else if (dclk_select == 1){
 			log('switching to quality mode');
 			// new_mode = '1872x1404@1.000';
 			new_mode = '1872x1404@5.000';
 			ebc.PnProxy.SetDclkSelectSync(0);
-			this.panel_label.set_text('Q');
+			//this.panel_label.set_text('Q');
 		} else
 			return;
+		this.update_label()
 		log("new mode:");
 		log(new_mode);
 
 		console.log(`PerformanceModeButton.switch_mode() with settings: ${this._settings}`);
-		const no_off_screen = this._settings.get_boolean('no-off-screen') ? 1 : 0;
-		try {
-			// The process starts running immediately after this
-			// function is called. Any error thrown here will be a
-			// result of the process failing to start, not the success
-			// or failure of the process itself.
-			let proc = Gio.Subprocess.new(
-				// The program and command options are passed as a list
-				// of arguments
-				['/bin/sh', '-c', `echo ${no_off_screen} > /sys/module/rockchip_ebc/parameters/no_off_screen`],
-					// /sys/module/drm/parameters/debug'],
-
-				// The flags control what I/O pipes are opened and how they are directed
-				Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
-			);
-
-			// Once the process has started, you can end it with
-			// `force_exit()`
-			// proc.force_exit();
-		} catch (e) {
-			logError(e);
-		}
+		ebc.PnProxy.SetNoOffScreenSync(this._settings.get_boolean('no-off-screen'));
 
         try {
             GLib.spawn_async(
@@ -327,6 +309,11 @@ var PerformanceModeButton = GObject.registerClass(
 
 			return GLib.SOURCE_REMOVE;
 		});
+    }
+
+    update_label() {
+    	const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+    	this.panel_label.set_text(dclk_select ? 'P' : 'Q');
     }
 
     _trigger_touch(widget, event) {
@@ -480,14 +467,26 @@ export default class PnHelperExtension extends Extension {
 		}
 
 		this._settings = this.getSettings();
+		this._settings.connect('changed::auto-refresh', (settings, key) => {
+			this._apply_auto_refresh(this._settings.get_boolean(key));
+		});
+		this._settings.connect('changed::bw-dither-invert', (settings, key) => {
+			this._apply_bw_dither_invert(this._settings.get_boolean(key));
+		});
 		this._settings.connect('changed::no-off-screen', (settings, key) => {
+			log(`changed::no-off-screen in PnHelperExtension.constructor()`);
 			this._apply_no_off_screen(this._settings.get_boolean(key));
 		});
+		log("Added settings handlers in PnHelperExtension.constructor()");
     }
 
 	onWaveformChanged(connection, sender, path, iface, signal, params, widget) {
 		// todo: look into .bind to access the label
 		log("Signal received: WaveformChanged");
+		this.update_panel_label();
+	}
+
+	update_panel_label() {
 		const waveform = ebc.PnProxy.GetDefaultWaveformSync();
 		const bw_mode = ebc.PnProxy.GetBwModeSync();
 		var new_label = '';
@@ -502,7 +501,7 @@ export default class PnHelperExtension extends Extension {
 		}
 
 		new_label += waveform.toString();
-		widget.set_text(new_label);
+		this.panel_label.set_text(new_label);
 	}
 
 	_write_to_sysfs_file(filename, value){
@@ -738,15 +737,14 @@ export default class PnHelperExtension extends Extension {
 	}
 
 	_add_auto_refresh_button(){
-		let filename = '/sys/module/rockchip_ebc/parameters/auto_refresh'
-		let auto_refresh = this._get_content(filename);
+		let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
 
 		log(`add: auto refresh state: ${auto_refresh}`);
 
-		if(auto_refresh == 'N'){
-			this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
-		} else {
+		if(auto_refresh){
 			this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
+		} else {
+			this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
 		}
 		this.mitem_auto_refresh.connect('activate', () => {
 			this.toggle_auto_refresh();
@@ -756,32 +754,33 @@ export default class PnHelperExtension extends Extension {
 	}
 
 	toggle_auto_refresh(){
-		log("Toggling atuo refresh");
-		let filename = '/sys/module/rockchip_ebc/parameters/auto_refresh'
-		let auto_refresh = this._get_content(filename);
+		log("Toggling auto refresh");
+		let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
 		log(`toggle: auto refresh state: ${auto_refresh}`);
 
-		if(auto_refresh == 'N'){
-			auto_refresh = 1;
-			this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
-		} else {
-			auto_refresh = 0;
+		auto_refresh = !auto_refresh;
+
+		if(auto_refresh){
 			this.mitem_auto_refresh.label.set_text('Enable Autorefresh');
+		} else {
+			this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
 		}
 
-		this._write_to_sysfs_file(
-			filename,
-			auto_refresh
-		);
+		this._settings.set_boolean('auto-refresh', auto_refresh);
+	}
 
+	_apply_auto_refresh(value) {
+		const auto_refresh = value ? 1 : 0;
+		log(`Setting auto refresh to ${auto_refresh}`);
+
+		ebc.PnProxy.SetAutoRefreshSync(value);
 	}
 
 	_add_dither_invert_button(){
 		this.mitem_bw_dither_invert = new PopupMenu.PopupMenuItem(_('BW Invert On'));
-		let filename = '/sys/module/rockchip_ebc/parameters/bw_dither_invert'
-		let bw_dither_invert = this._get_content(filename);
+		let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
 
-		if(bw_dither_invert == 'N'){
+		if(bw_dither_invert){
 			this.mitem_bw_dither_invert.label.set_text('BW Invert On');
 		} else {
 			this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
@@ -794,23 +793,26 @@ export default class PnHelperExtension extends Extension {
 	}
 
 	toggle_bw_dither_invert(){
-		let filename = '/sys/module/rockchip_ebc/parameters/bw_dither_invert'
-		let bw_dither_invert = this._get_content(filename);
+		let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
 		log(`Toggling dither invert (is: ${bw_dither_invert})`);
 
-		if(bw_dither_invert == 0){
-			bw_dither_invert = 1;
-			this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-		} else {
-			bw_dither_invert = 0;
+		bw_dither_invert = !bw_dither_invert;
+
+		if(bw_dither_invert){
 			this.mitem_bw_dither_invert.label.set_text('BW Invert On');
+		} else {
+			this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
 		}
 		log(`new value: ${bw_dither_invert})`);
 
-		this._write_to_sysfs_file(
-			filename,
-			bw_dither_invert
-		);
+		this._settings.set_boolean('bw-dither-invert', bw_dither_invert);
+	}
+
+	_apply_bw_dither_invert(value) {
+		const bw_dither_invert = value ? 1 : 0;
+		log(`Setting bw dither invert to ${bw_dither_invert}`);
+
+		ebc.PnProxy.SetBwDitherInvertSync(value);
 	}
 
 	_add_refresh_button(){
@@ -874,47 +876,49 @@ export default class PnHelperExtension extends Extension {
 	_add_no_off_screen_button(){
 		console.log("pnhelper: adding off screen button");
 		this.mitem_no_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
-		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
-		let off_screen = this._get_content(filename);
 
-		if(off_screen == 'N'){
-			this.mitem_no_off_screen.label.set_text('Clear Screen on Suspend');
-		} else {
-			this.mitem_no_off_screen.label.set_text('Keep screen on Suspend');
+		// Initialize
+		const no_off_screen = this._settings.get_boolean("no-off-screen");
+		if (no_off_screen != ebc.PnProxy.GetNoOffScreenSync()) {
+			this._apply_no_off_screen(no_off_screen);
 		}
+
 		this.mitem_no_off_screen.connect('activate', () => {
 			this.toggle_no_off_screen();
 		});
 
 		this._indicator.menu.addMenuItem(this.mitem_no_off_screen);
+
+		ebc.PnProxy.connectSignal("NoOffScreenChanged", this.update_no_off_screen_button.bind(this));
+
+		this.update_no_off_screen_button();
 	}
 
 	toggle_no_off_screen(){
-		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
-		let no_off_screen = this._get_content(filename);
-		log(`Toggling no off screen (is: ${no_off_screen})`);
+		let no_off_screen = ebc.PnProxy.GetNoOffScreenSync()[0];
+		log(`Toggling no off screen (is: ${no_off_screen}, settings: ${this._settings.get_boolean('no-off-screen')})`);
+		const force = no_off_screen != this._settings.get_boolean('no-off-screen');
 
-		if(no_off_screen == 'N'){
-			no_off_screen = true;
-			this.mitem_no_off_screen.label.set_text('Keep screen on Suspend');
-		} else {
-			no_off_screen = false;
-			this.mitem_no_off_screen.label.set_text('Clear Screen on Suspend');
-		}
+		no_off_screen = !no_off_screen;
 		log(`new value: ${no_off_screen}`);
 
 		this._settings.set_boolean('no-off-screen', no_off_screen);
+		if (force) {
+			log(`no_off_screen was out of sync with settings`);
+			this._apply_no_off_screen(no_off_screen);
+		}
 	}
 
 	_apply_no_off_screen(value) {
-		let filename = '/sys/module/rockchip_ebc/parameters/no_off_screen'
 		const no_off_screen = value ? 1 : 0;
 		log(`Setting no off screen to ${no_off_screen}`);
 
-		this._write_to_sysfs_file(
-			filename,
-			no_off_screen
-		);
+		ebc.PnProxy.SetNoOffScreenSync(value);
+	}
+
+	update_no_off_screen_button() {
+		let no_off_screen = ebc.PnProxy.GetNoOffScreenSync();
+		this.mitem_no_off_screen.label.set_text(`${no_off_screen ? 'Clear' : 'Keep'} screen on Suspend`);
 	}
 
     enable() {
@@ -953,7 +957,7 @@ export default class PnHelperExtension extends Extension {
 		// Add the label
         // this._indicator.add_child(this.panel_label);
 		this.dbus_proxy = ebc.ebc_subscribe_to_waveformchanged(
-			this.onWaveformChanged,
+			this.onWaveformChanged.bind(this),
 			this.panel_label
 		);
 
@@ -979,9 +983,17 @@ export default class PnHelperExtension extends Extension {
 		this._indicator.menu.addMenuItem(item);
 
 		this._settings = this.getSettings();
-        this._settings.connect('changed::no-off-screen', (settings, key) => {
-            this._apply_no_off_screen(this._settings.get_boolean(key));
-        });
+		this._settings.connect('changed::auto-refresh', (settings, key) => {
+			this._apply_auto_refresh(this._settings.get_boolean(key));
+		});
+		this._settings.connect('changed::bw-dither-invert', (settings, key) => {
+			this._apply_bw_dither_invert(this._settings.get_boolean(key));
+		});
+		this._settings.connect('changed::no-off-screen', (settings, key) => {
+			log(`changed::no-off-screen in PnHelperExtension.enable()`);
+			this._apply_no_off_screen(this._settings.get_boolean(key));
+		});
+		log("Added settings handlers in PnHelperExtension.enable()");
 
 		this._add_bw_buttons();
 		this._add_dither_invert_button();
@@ -995,6 +1007,7 @@ export default class PnHelperExtension extends Extension {
 		//this._change_bw_mode(0);
 
 		// this._btpen = new btpen.Indicator_ng();
+		this.update_panel_label();
     }
 
 	_get_content(sysfs_file){

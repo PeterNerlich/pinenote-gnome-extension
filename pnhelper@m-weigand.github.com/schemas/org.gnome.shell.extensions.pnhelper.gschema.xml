@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.pnhelper" path="/org/gnome/shell/extensions/pnhelper@m-weigand.github.com/">
+    <key name="auto-refresh" type="b">
+      <default>true</default>
+      <summary>Auto Refresh</summary>
+      <description>Whether the screen should be automatically refreshed regularly</description>
+    </key>
+    <key name="bw-dither-invert" type="b">
+      <default>false</default>
+      <summary>Invert BW Dithering</summary>
+      <description>Whether the screen should be inverted in Black and White Dithering mode</description>
+    </key>
     <key name="no-off-screen" type="b">
       <default>false</default>
+      <summary>No Off Screen</summary>
+      <description>Whether the current screen contents should be kept when entering suspend</description>
     </key>
   </schema>
 </schemalist>
