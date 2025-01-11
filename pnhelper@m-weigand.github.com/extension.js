@@ -526,6 +526,7 @@ export default class PnHelperExtension extends Extension {
 		ebc.PnProxy.SetBwModeSync(new_mode);
 
 		if (new_mode == 0){
+			// grayscale mode
 			this.bw_but_grayscale.visible = true;
 			this.bw_but_bw_dither.visible = true;
 			this.bw_but_bw.visible = true;
@@ -536,7 +537,7 @@ export default class PnHelperExtension extends Extension {
 			// this._set_waveform(4);
 			ebc.PnProxy.SetDefaultWaveformSync(4);
 		} else if (new_mode == 1){
-			// bw+dither
+			// bw+dither mode
 			this.bw_but_grayscale.visible = true;
 			this.bw_but_bw_dither.visible = true;
 			this.bw_but_bw.visible = true;
@@ -547,7 +548,7 @@ export default class PnHelperExtension extends Extension {
 			ebc.PnProxy.SetDefaultWaveformSync(1);
 			// this._set_waveform(1);
 		} else if (new_mode == 2){
-			// bw
+			// Black & White mode
 			this.bw_but_grayscale.visible = true;
 			this.bw_but_bw_dither.visible = true;
 			this.bw_but_bw.visible = true;
@@ -563,7 +564,7 @@ export default class PnHelperExtension extends Extension {
 			this.bw_but_bw_dither.visible = true;
 			this.bw_but_bw.visible = true;
 			this.bw_but_du4 = true;
-			this.m_bw_slider.visible = true;
+			this.m_bw_slider.visible = false;
 			this.mitem_bw_dither_invert.visible = true;
 			// use DU4 waveform
 			ebc.PnProxy.SetDefaultWaveformSync(3);
@@ -600,6 +601,8 @@ export default class PnHelperExtension extends Extension {
 			this._change_bw_mode(2);
 		});
 		this._indicator.menu.addMenuItem(this.bw_but_bw);
+
+		this._add_bw_slider();
 
 		// 4
 		this.bw_but_du4 = new PopupMenu.PopupMenuItem(_('DU4 Mode'));
@@ -919,7 +922,6 @@ export default class PnHelperExtension extends Extension {
 		this._indicator.menu.addMenuItem(item);
 
 		this._add_bw_buttons();
-		this._add_bw_slider();
 		this._add_dither_invert_button();
 		this._add_auto_refresh_button();
 		this._add_waveform_buttons();
