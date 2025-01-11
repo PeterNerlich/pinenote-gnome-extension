@@ -63,6 +63,8 @@ import * as BusUtils from './busUtils.js';
 
 import * as ebc from './ebc.js';
 import * as usb from './usb.js';
+import * as travel_mode from './travel_mode.js';
+
 //import * as display_rotator from './rotator.js';
 // import * as btpen from './btpen.js';
 
@@ -848,12 +850,20 @@ export default class PnHelperExtension extends Extension {
 		// );
     }
 
+	add_travel_mode_toggle(){
+		this._indicator_travel_mode = new travel_mode.Indicator();
+		Main.panel.statusArea.quickSettings.addExternalIndicator(
+			this._indicator_travel_mode
+		);
+	}
+
     enable() {
         log(`enabling ${this.metadata.name}`);
 
 		this.add_refresh_button();
 		this.add_performance_mode_button();
 		this.add_warm_indicator_to_main_gnome_menu();
+		this.add_travel_mode_toggle();
 
 		// ////////////////////////////////////////////////////////////////////
 		this._topBox = new St.BoxLayout({ });
@@ -950,6 +960,10 @@ export default class PnHelperExtension extends Extension {
 
 		this._indicator2.destroy();
         this._indicator2 = null;
+
+		this._indicator_travel_mode.quickSettingsItems.forEach(item => item.destroy());
+		this._indicator_travel_mode.destroy();
+		this._indicator_travel_mode = null;
     }
 
 	rotate_screen(){
