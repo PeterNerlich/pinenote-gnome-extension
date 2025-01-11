@@ -11,32 +11,44 @@ import GLib from 'gi://GLib';
 const PinenoteDbusInterface = `
 <node>
   <interface name="org.pinenote.ebc">
-    <method name="GetAutorefresh">
-      <arg name="state_autorefresh" type="b" direction="out"/>
-    </method>
-    <method name="GetBwMode">
-      <arg name="current_mode" type="y" direction="out"/>
-    </method>
-    <method name="GetDclkSelect">
-      <arg name="dclk_select" type="y" direction="out"/>
-    </method>
-    <method name="GetDefaultWaveform">
-      <arg name="current_waveform" type="y" direction="out"/>
-    </method>
-    <method name="RequestQualityOrPerformanceMode">
-      <arg name="mode_request" type="y" direction="in"/>
+    <method name="GetAutoRefresh">
+      <arg name="state_auto_refresh" type="b" direction="out"/>
     </method>
     <method name="SetAutoRefresh">
       <arg name="state" type="b" direction="in"/>
     </method>
+    <method name="GetBwMode">
+      <arg name="current_mode" type="y" direction="out"/>
+    </method>
     <method name="SetBwMode">
       <arg name="new_mode" type="y" direction="in"/>
+    </method>
+    <method name="GetBwDitherInvert">
+      <arg name="current_mode" type="b" direction="out"/>
+    </method>
+    <method name="SetBwDitherInvert">
+      <arg name="new_mode" type="b" direction="in"/>
+    </method>
+    <method name="GetDclkSelect">
+      <arg name="dclk_select" type="y" direction="out"/>
     </method>
     <method name="SetDclkSelect">
       <arg name="state" type="y" direction="in"/>
     </method>
+    <method name="GetDefaultWaveform">
+      <arg name="current_waveform" type="y" direction="out"/>
+    </method>
     <method name="SetDefaultWaveform">
       <arg name="waveform" type="y" direction="in"/>
+    </method>
+    <method name="GetNoOffScreen">
+      <arg name="no_off_screen" type="b" direction="out"/>
+    </method>
+    <method name="SetNoOffScreen">
+      <arg name="new_mode" type="b" direction="in"/>
+    </method>
+    <method name="RequestQualityOrPerformanceMode">
+      <arg name="mode_request" type="y" direction="in"/>
     </method>
     <method name="SetEBCParameters">
       <arg name="default_waveform" type="y" direction="in"/>
@@ -44,12 +56,20 @@ const PinenoteDbusInterface = `
     </method>
     <method name="TriggerGlobalRefresh">
     </method>
+    <signal name="AutoRefreshChanged">
+    </signal>
     <signal name="BwModeChanged">
     </signal>
-    <signal name="ReqQualityOrPerformance">
-      <arg name="requested_mode" type="y"/>
+    <signal name="BwDitherInvertChanged">
+    </signal>
+    <signal name="DclkSelectChanged">
     </signal>
     <signal name="WaveformChanged">
+    </signal>
+    <signal name="NoOffScreenChanged">
+    </signal>
+    <signal name="RequestedQualityOrPerformance">
+      <arg name="requested_mode" type="y"/>
     </signal>
     <property name="default_waveform" type="y" access="readwrite"/>
   </interface>
@@ -85,7 +105,7 @@ export function ebc_subscribe_to_requestperformancemode(func, widget){
         func(connection, sender, path, iface, signal, params, widget);
     }
     const ebc_dbus = PnProxy.connectSignal(
-        "ReqQualityOrPerformance", func_signal
+        "RequestedQualityOrPerformance", func_signal
     );
     return(ebc_dbus);
 }
