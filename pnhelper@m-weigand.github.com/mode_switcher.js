@@ -50,18 +50,18 @@ function rotate_to(transform) {
     // let variant = state.pack_to_apply( BusUtils.Methods['temporary'] );
     let variant = state.pack_to_apply( BusUtils.Methods['persistent'] );
     call_dbus_method('ApplyMonitorsConfig', variant);
-	log("rotation done");
+    log("rotation done");
 }
 
 function switch_mode(new_mode) {
     let state = get_state();
     let builtin_monitor = state.builtin_monitor;
     let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
-	// builtin_monitor.current_mode_id = '1872x1404@20.000';
-	builtin_monitor.current_mode_id = new_mode;
+    // builtin_monitor.current_mode_id = '1872x1404@20.000';
+    builtin_monitor.current_mode_id = new_mode;
     let variant = state.pack_to_apply( BusUtils.Methods['persistent'] );
     call_dbus_method('ApplyMonitorsConfig', variant);
-	log("mode switch done");
+    log("mode switch done");
 }
 
 log(ARGV);
@@ -80,14 +80,14 @@ log("current monitor state:");
 log(logical_monitor.transform);
 let target_orientation;
 switch (logical_monitor.transform) {
-	case 0:
-	case 2:
-		target_orientation = 1;
-		break;
-	case 1:
-	case 3:
-		target_orientation = 0;
-		break;
+    case 0:
+    case 2:
+        target_orientation = 1;
+        break;
+    case 1:
+    case 3:
+        target_orientation = 0;
+        break;
 }
 log("target");
 log(target_orientation);

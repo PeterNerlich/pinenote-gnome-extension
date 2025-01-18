@@ -81,55 +81,55 @@ const Orientation = Object.freeze({
 //
 
 var USBDialog = GObject.registerClass(
-	class USBDialog_a extends ModalDialog.ModalDialog {
-		_init() {
-			super._init();
-			// this.result = -1;
+    class USBDialog_a extends ModalDialog.ModalDialog {
+        _init() {
+            super._init();
+            // this.result = -1;
 
-			this._cancelButton = this.addButton({
-			// note: I get JS errors for this class, but am not
-			// sure if this is a bug in this code or in
-			// gnome-shell...
-			// error msg:
-			// JS ERROR: Error: Argument descendant may not be null
-			label: _('Do nothing'),
-				 action: this._onFailure.bind(this),
-				 key: Clutter.KEY_Escape,
-			});
-			this._okButton = this.addButton({
-				 label: _('Keep Changes'),
-				 action: this._onSuccess.bind(this),
-				 // default: true,
-			});
-			this._choice_3 = this.addButton({
-				 label: _('Variant 3'),
-				 //action: this._set_result(3),
-				 action: () => {
-					this._set_result(3)
-				},
-				//default: true,
-			});
+            this._cancelButton = this.addButton({
+            // note: I get JS errors for this class, but am not
+            // sure if this is a bug in this code or in
+            // gnome-shell...
+            // error msg:
+            // JS ERROR: Error: Argument descendant may not be null
+            label: _('Do nothing'),
+                 action: this._onFailure.bind(this),
+                 key: Clutter.KEY_Escape,
+            });
+            this._okButton = this.addButton({
+                 label: _('Keep Changes'),
+                 action: this._onSuccess.bind(this),
+                 // default: true,
+            });
+            this._choice_3 = this.addButton({
+                 label: _('Variant 3'),
+                 //action: this._set_result(3),
+                 action: () => {
+                    this._set_result(3)
+                },
+                //default: true,
+            });
 
-		}
+        }
 
-		_set_result(result) {
-			this.result = 3;
-			log("RESULT: ");
-			log(`${result}`)
-			this.close();
-			// return true;
-		};
+        _set_result(result) {
+            this.result = 3;
+            log("RESULT: ");
+            log(`${result}`)
+            this.close();
+            // return true;
+        };
 
-		    _onFailure() {
-			//this._wm.complete_display_change(false);
-			this.close();
-		    };
+            _onFailure() {
+            //this._wm.complete_display_change(false);
+            this.close();
+            };
 
-		    _onSuccess() {
-			//this._wm.complete_display_change(true);
-			this.close();
-		    };
-	}
+            _onSuccess() {
+            //this._wm.complete_display_change(true);
+            this.close();
+            };
+    }
 );
 
 /*
@@ -155,29 +155,29 @@ dialogLayout.addButton({
 
 
 var TriggerRefreshButton = GObject.registerClass(
-	class TriggerRefreshButton extends PanelMenu.Button {
+    class TriggerRefreshButton extends PanelMenu.Button {
     _init() {
         super._init();
         this.set_track_hover(true);
         this.set_reactive(true);
 
         this.add_child(new St.Icon({
-			icon_name: 'view-refresh-symbolic',
-			style_class: 'system-status-icon'
-		}));
+            icon_name: 'view-refresh-symbolic',
+            style_class: 'system-status-icon'
+        }));
 
         this.connect('button-press-event', this._trigger_btn.bind(this));
         this.connect('touch-event', this._trigger_touch.bind(this));
     }
 
     _trigger_touch(widget, event) {
-		if (event.type() !== Clutter.EventType.TOUCH_BEGIN){
-			ebc.ebc_trigger_global_refresh();
-		}
+        if (event.type() !== Clutter.EventType.TOUCH_BEGIN){
+            ebc.ebc_trigger_global_refresh();
+        }
     }
 
     _trigger_btn(widget, event) {
-		ebc.ebc_trigger_global_refresh();
+        ebc.ebc_trigger_global_refresh();
     }
 });
 
@@ -206,36 +206,36 @@ var TriggerRefreshButton = GObject.registerClass(
  *
  * */
 var PerformanceModeButton = GObject.registerClass(
-	class PerformanceModeButton extends PanelMenu.Button {
+    class PerformanceModeButton extends PanelMenu.Button {
     _init(metadata, settings) {
         super._init();
         this.set_track_hover(true);
         this.set_reactive(true);
-		this.metadata = metadata;
+        this.metadata = metadata;
         this._settings = settings;
-		console.log(`PerformanceModeButton initializing with settings: ${this._settings}`);
+        console.log(`PerformanceModeButton initializing with settings: ${this._settings}`);
 
-		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
 
-		let label_text = 'N'
-		let new_mode = ''
-		// set mode (i.e., refresh rate) according to the dclk_select
-	        // value
-		if (dclk_select == 0){
-			console.log("Quality mode");
-			console.log("Switching to 5 Hz refresh rate");
-			new_mode = '1872x1404@5.000';
-			label_text = 'Q'
-		} else if (dclk_select == 1) {
-			label_text = 'P'
-			console.log("Performance mode");
-			console.log("Switching to 80 Hz refresh rate");
-			new_mode = '1872x1404@80.000';
-		}
+        let label_text = 'N'
+        let new_mode = ''
+        // set mode (i.e., refresh rate) according to the dclk_select
+            // value
+        if (dclk_select == 0){
+            console.log("Quality mode");
+            console.log("Switching to 5 Hz refresh rate");
+            new_mode = '1872x1404@5.000';
+            label_text = 'Q'
+        } else if (dclk_select == 1) {
+            label_text = 'P'
+            console.log("Performance mode");
+            console.log("Switching to 80 Hz refresh rate");
+            new_mode = '1872x1404@80.000';
+        }
 
-		// disable trying to fix the mode on initialization
-		// this only throws an exception
-		/*
+        // disable trying to fix the mode on initialization
+        // this only throws an exception
+        /*
         try {
             GLib.spawn_async(
                 Me.path,
@@ -246,11 +246,11 @@ var PerformanceModeButton = GObject.registerClass(
         } catch (err) {
             logError(err);
         }
-		*/
+        */
 
-		this.panel_label = new St.Label({
-			text: label_text,
-			y_expand: true,
+        this.panel_label = new St.Label({
+            text: label_text,
+            y_expand: true,
             y_align: Clutter.ActorAlign.CENTER,
         });
 
@@ -265,30 +265,30 @@ var PerformanceModeButton = GObject.registerClass(
 
     switch_mode() {
         log('MODE SWITCH');
-		const dclk_select = ebc.PnProxy.GetDclkSelectSync();
-		let new_mode = ''
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        let new_mode = ''
 
-		if (dclk_select == 0){
-			// we are in quality mode and want performance mode
-			log('switching to performance mode');
-			new_mode = '1872x1404@80.000';
-			ebc.PnProxy.SetDclkSelectSync(1);
-			//this.panel_label.set_text('P');
-		}
-		else if (dclk_select == 1){
-			log('switching to quality mode');
-			// new_mode = '1872x1404@1.000';
-			new_mode = '1872x1404@5.000';
-			ebc.PnProxy.SetDclkSelectSync(0);
-			//this.panel_label.set_text('Q');
-		} else
-			return;
-		this.update_label()
-		log("new mode:");
-		log(new_mode);
+        if (dclk_select == 0){
+            // we are in quality mode and want performance mode
+            log('switching to performance mode');
+            new_mode = '1872x1404@80.000';
+            ebc.PnProxy.SetDclkSelectSync(1);
+            //this.panel_label.set_text('P');
+        }
+        else if (dclk_select == 1){
+            log('switching to quality mode');
+            // new_mode = '1872x1404@1.000';
+            new_mode = '1872x1404@5.000';
+            ebc.PnProxy.SetDclkSelectSync(0);
+            //this.panel_label.set_text('Q');
+        } else
+            return;
+        this.update_label()
+        log("new mode:");
+        log(new_mode);
 
-		console.log(`PerformanceModeButton.switch_mode() with settings: ${this._settings}`);
-		ebc.PnProxy.SetNoOffScreenSync(this._settings.get_boolean('no-off-screen'));
+        console.log(`PerformanceModeButton.switch_mode() with settings: ${this._settings}`);
+        ebc.PnProxy.SetNoOffScreenSync(this._settings.get_boolean('no-off-screen'));
 
         try {
             GLib.spawn_async(
@@ -301,149 +301,149 @@ var PerformanceModeButton = GObject.registerClass(
             logError(err);
         }
 
-		const removeId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
-    		log('This callback will be invoked once after 1 seconds');
-			ebc.ebc_trigger_global_refresh();
+        const removeId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 1, () => {
+            log('This callback will be invoked once after 1 seconds');
+            ebc.ebc_trigger_global_refresh();
 
-    		// GLib.Source.remove(timeoutId);
+            // GLib.Source.remove(timeoutId);
 
-			return GLib.SOURCE_REMOVE;
-		});
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     update_label() {
-    	const dclk_select = ebc.PnProxy.GetDclkSelectSync();
-    	this.panel_label.set_text(dclk_select ? 'P' : 'Q');
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        this.panel_label.set_text(dclk_select ? 'P' : 'Q');
     }
 
     _trigger_touch(widget, event) {
-		if (event.type() !== Clutter.EventType.TOUCH_BEGIN){
-			this.switch_mode();
-			// ebc.ebc_trigger_global_refresh();
-		}
+        if (event.type() !== Clutter.EventType.TOUCH_BEGIN){
+            this.switch_mode();
+            // ebc.ebc_trigger_global_refresh();
+        }
     }
 
     _trigger_btn(widget, event) {
-		// ebc.ebc_trigger_global_refresh();
-		this.switch_mode();
+        // ebc.ebc_trigger_global_refresh();
+        this.switch_mode();
     }
 });
 
 var WarmSlider = GObject.registerClass(
-	class FeatureSlider extends QuickSettings.QuickSlider {
-		_init() {
-			super._init({
-				icon_name: 'weather-clear-night-symbolic',
-			});
+    class FeatureSlider extends QuickSettings.QuickSlider {
+        _init() {
+            super._init({
+                icon_name: 'weather-clear-night-symbolic',
+            });
 
-			this.filepath = "/sys/class/backlight/backlight_warm/brightness";
-			this.max_filepath = "/sys/class/backlight/backlight_warm/max_brightness";
+            this.filepath = "/sys/class/backlight/backlight_warm/brightness";
+            this.max_filepath = "/sys/class/backlight/backlight_warm/max_brightness";
 
-			// set slider to current value
-			this.max_value = this._get_content(this.max_filepath);
-			let cur_value = this._get_content(this.filepath);
+            // set slider to current value
+            this.max_value = this._get_content(this.max_filepath);
+            let cur_value = this._get_content(this.filepath);
 
-			let cur_slider = cur_value / this.max_value;
-			log(`Current value: ${cur_value} - ${cur_slider}`);
-			this.slider.unblock_signal_handler(this._sliderChangedId);
+            let cur_slider = cur_value / this.max_value;
+            log(`Current value: ${cur_value} - ${cur_slider}`);
+            this.slider.unblock_signal_handler(this._sliderChangedId);
 
-			this.slider.block_signal_handler(this._sliderChangedId);
-			this.slider.value = cur_slider;
+            this.slider.block_signal_handler(this._sliderChangedId);
+            this.slider.value = cur_slider;
 
-			this._sliderChangedId = this.slider.connect('notify::value',
-				this._onSliderChanged.bind(this));
+            this._sliderChangedId = this.slider.connect('notify::value',
+                this._onSliderChanged.bind(this));
 
-			this._onSettingsChanged();
+            this._onSettingsChanged();
 
-			// Set an accessible name for the slider
-			this.slider.accessible_name = _("Warm Backlight Brightness");
-		}
+            // Set an accessible name for the slider
+            this.slider.accessible_name = _("Warm Backlight Brightness");
+        }
 
-		_onSettingsChanged() {
-			// Prevent the slider from emitting a change signal while being updated
-			this.slider.block_signal_handler(this._sliderChangedId);
-			// this.slider.value = this._settings.get_uint('feature-range') / 100.0;
-			this.slider.unblock_signal_handler(this._sliderChangedId);
-		}
+        _onSettingsChanged() {
+            // Prevent the slider from emitting a change signal while being updated
+            this.slider.block_signal_handler(this._sliderChangedId);
+            // this.slider.value = this._settings.get_uint('feature-range') / 100.0;
+            this.slider.unblock_signal_handler(this._sliderChangedId);
+        }
 
-		_write_to_sysfs_file(filename, value){
-			try {
-				// The process starts running immediately after this
-				// function is called. Any error thrown here will be a
-				// result of the process failing to start, not the success
-				// or failure of the process itself.
-				let proc = Gio.Subprocess.new(
-					// The program and command options are passed as a list
-					// of arguments
-					['/bin/sh', '-c', `echo ${value} > ` + filename],
-						// /sys/module/drm/parameters/debug'],
+        _write_to_sysfs_file(filename, value){
+            try {
+                // The process starts running immediately after this
+                // function is called. Any error thrown here will be a
+                // result of the process failing to start, not the success
+                // or failure of the process itself.
+                let proc = Gio.Subprocess.new(
+                    // The program and command options are passed as a list
+                    // of arguments
+                    ['/bin/sh', '-c', `echo ${value} > ` + filename],
+                        // /sys/module/drm/parameters/debug'],
 
-					// The flags control what I/O pipes are opened and how they are directed
-					Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
-				);
+                    // The flags control what I/O pipes are opened and how they are directed
+                    Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+                );
 
-				// Once the process has started, you can end it with
-				// `force_exit()`
-				// proc.force_exit();
-			} catch (e) {
-				logError(e);
-			}
-		}
+                // Once the process has started, you can end it with
+                // `force_exit()`
+                // proc.force_exit();
+            } catch (e) {
+                logError(e);
+            }
+        }
 
-		_get_content(sysfs_file){
-			// read current value
-			const file = Gio.File.new_for_path(sysfs_file);
-			const [, contents, etag] = file.load_contents(null);
-			const ByteArray = imports.byteArray;
-			const contentsString = ByteArray.toString(contents);
+        _get_content(sysfs_file){
+            // read current value
+            const file = Gio.File.new_for_path(sysfs_file);
+            const [, contents, etag] = file.load_contents(null);
+            const ByteArray = imports.byteArray;
+            const contentsString = ByteArray.toString(contents);
 
-			return contentsString.replace(/[\n\r]/g, '');
-		}
+            return contentsString.replace(/[\n\r]/g, '');
+        }
 
-		_onSliderChanged() {
-			// Assuming our GSettings holds values between 0..100, adjust
-			// for the slider taking values between 0..1
-			const percent = Math.floor(this.slider.value * 100);
+        _onSliderChanged() {
+            // Assuming our GSettings holds values between 0..100, adjust
+            // for the slider taking values between 0..1
+            const percent = Math.floor(this.slider.value * 100);
 
-			let relative = this.slider.value;
-			const brightness = Math.round(relative * this._get_content(this.max_filepath));
-			// log(`brightness: ${brightness}`);
-			this._write_to_sysfs_file(this.filepath, brightness);
-		}
+            let relative = this.slider.value;
+            const brightness = Math.round(relative * this._get_content(this.max_filepath));
+            // log(`brightness: ${brightness}`);
+            this._write_to_sysfs_file(this.filepath, brightness);
+        }
 });
 
 var QuickSettingsWarmSlider = GObject.registerClass(
-	class FeatureIndicator extends QuickSettings.SystemIndicator {
-		_init() {
-			super._init();
-			console.log("pnhelper: QuickSettingsWarmSlider init");
+    class FeatureIndicator extends QuickSettings.SystemIndicator {
+        _init() {
+            super._init();
+            console.log("pnhelper: QuickSettingsWarmSlider init");
 
-			// Create the slider and associate it with the indicator, being
-			// sure to destroy it along with the indicator
-			this.quickSettingsItems.push(new WarmSlider());
+            // Create the slider and associate it with the indicator, being
+            // sure to destroy it along with the indicator
+            this.quickSettingsItems.push(new WarmSlider());
 
-			this.connect('destroy', () => {
-				this.quickSettingsItems.forEach(item => item.destroy());
-			});
+            this.connect('destroy', () => {
+                this.quickSettingsItems.forEach(item => item.destroy());
+            });
 
-			// Add the indicator to the panel
-			// TODO
-			// QuickSettingsMenu._indicators.add_child(this);
+            // Add the indicator to the panel
+            // TODO
+            // QuickSettingsMenu._indicators.add_child(this);
 
-			// Add the slider to the menu, this time passing `2` as the second
-			// argument to ensure the slider spans both columns of the menu
-			// TODO
-			// QuickSettingsMenu._addItems(this.quickSettingsItems, 2);
+            // Add the slider to the menu, this time passing `2` as the second
+            // argument to ensure the slider spans both columns of the menu
+            // TODO
+            // QuickSettingsMenu._addItems(this.quickSettingsItems, 2);
 
-			// Move the slider from the bottom to be with the cool light slider
-			// TODO
-			// for (const item of this.quickSettingsItems) {
-			// 	QuickSettingsMenu.menu._grid.set_child_below_sibling(
-			// 		item,
-			// 		QuickSettingsMenu._brightness.quickSettingsItems[0]
-			// 	);
-			// }
-		}
+            // Move the slider from the bottom to be with the cool light slider
+            // TODO
+            // for (const item of this.quickSettingsItems) {
+            //  QuickSettingsMenu.menu._grid.set_child_below_sibling(
+            //      item,
+            //      QuickSettingsMenu._brightness.quickSettingsItems[0]
+            //  );
+            // }
+        }
 });
 
 
@@ -452,180 +452,180 @@ var QuickSettingsWarmSlider = GObject.registerClass(
 // https://gjs.guide/extensions/topics/extension.html
 export default class PnHelperExtension extends Extension {
     constructor(metadata) {
-		super(metadata);
+        super(metadata);
         this._indicator = null;
         this._indicator2 = null;
         this._settings = null;
 
-		const home = GLib.getenv("HOME");
-		// sometimes (on first boot), we do not want the overview to be shown.
-		// We want to directly go to the auto-started applications
-		const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
-		if (file.query_exists(null)){
-			log("disabling overview");
-			Main.sessionMode.hasOverview = false;
-		}
+        const home = GLib.getenv("HOME");
+        // sometimes (on first boot), we do not want the overview to be shown.
+        // We want to directly go to the auto-started applications
+        const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
+        if (file.query_exists(null)){
+            log("disabling overview");
+            Main.sessionMode.hasOverview = false;
+        }
 
-		this._settings = this.getSettings();
-		this._settings.connect('changed::auto-refresh', (settings, key) => {
-			this._apply_auto_refresh(this._settings.get_boolean(key));
-		});
-		this._settings.connect('changed::bw-dither-invert', (settings, key) => {
-			this._apply_bw_dither_invert(this._settings.get_boolean(key));
-		});
-		this._settings.connect('changed::no-off-screen', (settings, key) => {
-			log(`changed::no-off-screen in PnHelperExtension.constructor()`);
-			this._apply_no_off_screen(this._settings.get_boolean(key));
-		});
-		log("Added settings handlers in PnHelperExtension.constructor()");
+        this._settings = this.getSettings();
+        this._settings.connect('changed::auto-refresh', (settings, key) => {
+            this._apply_auto_refresh(this._settings.get_boolean(key));
+        });
+        this._settings.connect('changed::bw-dither-invert', (settings, key) => {
+            this._apply_bw_dither_invert(this._settings.get_boolean(key));
+        });
+        this._settings.connect('changed::no-off-screen', (settings, key) => {
+            log(`changed::no-off-screen in PnHelperExtension.constructor()`);
+            this._apply_no_off_screen(this._settings.get_boolean(key));
+        });
+        log("Added settings handlers in PnHelperExtension.constructor()");
     }
 
-	onWaveformChanged(connection, sender, path, iface, signal, params, widget) {
-		// todo: look into .bind to access the label
-		log("Signal received: WaveformChanged");
-		this.update_panel_label();
-	}
+    onWaveformChanged(connection, sender, path, iface, signal, params, widget) {
+        // todo: look into .bind to access the label
+        log("Signal received: WaveformChanged");
+        this.update_panel_label();
+    }
 
-	update_panel_label() {
-		const waveform = ebc.PnProxy.GetDefaultWaveformSync();
-		const bw_mode = ebc.PnProxy.GetBwModeSync();
-		var new_label = '';
-		if (bw_mode == 0){
-			new_label += 'G:';
-		} else if (bw_mode == 1) {
-			new_label += 'BW+D:';
-		} else if (bw_mode == 2) {
-			new_label += 'BW:';
-		} else if (bw_mode == 3) {
-			new_label += 'DU4:';
-		}
+    update_panel_label() {
+        const waveform = ebc.PnProxy.GetDefaultWaveformSync();
+        const bw_mode = ebc.PnProxy.GetBwModeSync();
+        var new_label = '';
+        if (bw_mode == 0){
+            new_label += 'G:';
+        } else if (bw_mode == 1) {
+            new_label += 'BW+D:';
+        } else if (bw_mode == 2) {
+            new_label += 'BW:';
+        } else if (bw_mode == 3) {
+            new_label += 'DU4:';
+        }
 
-		new_label += waveform.toString();
-		this.panel_label.set_text(new_label);
-	}
+        new_label += waveform.toString();
+        this.panel_label.set_text(new_label);
+    }
 
-	_write_to_sysfs_file(filename, value){
-		try {
-			// The process starts running immediately after this function is called. Any
-			// error thrown here will be a result of the process failing to start, not
-			// the success or failure of the process itself.
-			let proc = Gio.Subprocess.new(
-				// The program and command options are passed as a list of arguments
-				['/bin/sh', '-c', `echo ${value} > ` + filename],
-					// /sys/module/drm/parameters/debug'],
+    _write_to_sysfs_file(filename, value){
+        try {
+            // The process starts running immediately after this function is called. Any
+            // error thrown here will be a result of the process failing to start, not
+            // the success or failure of the process itself.
+            let proc = Gio.Subprocess.new(
+                // The program and command options are passed as a list of arguments
+                ['/bin/sh', '-c', `echo ${value} > ` + filename],
+                    // /sys/module/drm/parameters/debug'],
 
-				// The flags control what I/O pipes are opened and how they are directed
-				Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
-			);
+                // The flags control what I/O pipes are opened and how they are directed
+                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
+            );
 
-			// Once the process has started, you can end it with `force_exit()`
-			// proc.force_exit();
-		} catch (e) {
-			logError(e);
-		}
-	}
+            // Once the process has started, you can end it with `force_exit()`
+            // proc.force_exit();
+        } catch (e) {
+            logError(e);
+        }
+    }
 
-	_change_bw_mode(new_mode){
+    _change_bw_mode(new_mode){
 
-		// change the mode BEFORE setting the waveform so a potential
-		// bw-conversion will be properly handled
-		// this._write_to_sysfs_file(
-		// 	'/sys/module/rockchip_ebc/parameters/bw_mode',
-		// 	new_mode
-		// );
-		ebc.PnProxy.SetBwModeSync(new_mode);
+        // change the mode BEFORE setting the waveform so a potential
+        // bw-conversion will be properly handled
+        // this._write_to_sysfs_file(
+        //  '/sys/module/rockchip_ebc/parameters/bw_mode',
+        //  new_mode
+        // );
+        ebc.PnProxy.SetBwModeSync(new_mode);
 
-		if (new_mode == 0){
-			// grayscale mode
-			this.bw_but_grayscale.visible = true;
-			this.bw_but_bw_dither.visible = true;
-			this.bw_but_bw.visible = true;
-			this.bw_but_du4 = true;
-			this.m_bw_slider.visible = false;
-			this.mitem_bw_dither_invert.visible = false;
-			// use GC16 waveform
-			// this._set_waveform(4);
-			ebc.PnProxy.SetDefaultWaveformSync(4);
-		} else if (new_mode == 1){
-			// bw+dither mode
-			this.bw_but_grayscale.visible = true;
-			this.bw_but_bw_dither.visible = true;
-			this.bw_but_bw.visible = true;
-			this.bw_but_du4 = true;
-			this.m_bw_slider.visible = false;
-			this.mitem_bw_dither_invert.visible = true;
-			// use A2 waveform
-			ebc.PnProxy.SetDefaultWaveformSync(1);
-			// this._set_waveform(1);
-		} else if (new_mode == 2){
-			// Black & White mode
-			this.bw_but_grayscale.visible = true;
-			this.bw_but_bw_dither.visible = true;
-			this.bw_but_bw.visible = true;
-			this.bw_but_du4 = true;
-			this.m_bw_slider.visible = true;
-			this.mitem_bw_dither_invert.visible = true;
-			// use A2 waveform
-			// this._set_waveform(1);
-			ebc.PnProxy.SetDefaultWaveformSync(1);
-		} else if (new_mode == 3){
-			// DU4 mode
-			this.bw_but_grayscale.visible = true;
-			this.bw_but_bw_dither.visible = true;
-			this.bw_but_bw.visible = true;
-			this.bw_but_du4 = true;
-			this.m_bw_slider.visible = false;
-			this.mitem_bw_dither_invert.visible = true;
-			// use DU4 waveform
-			ebc.PnProxy.SetDefaultWaveformSync(3);
-		}
+        if (new_mode == 0){
+            // grayscale mode
+            this.bw_but_grayscale.visible = true;
+            this.bw_but_bw_dither.visible = true;
+            this.bw_but_bw.visible = true;
+            this.bw_but_du4 = true;
+            this.m_bw_slider.visible = false;
+            this.mitem_bw_dither_invert.visible = false;
+            // use GC16 waveform
+            // this._set_waveform(4);
+            ebc.PnProxy.SetDefaultWaveformSync(4);
+        } else if (new_mode == 1){
+            // bw+dither mode
+            this.bw_but_grayscale.visible = true;
+            this.bw_but_bw_dither.visible = true;
+            this.bw_but_bw.visible = true;
+            this.bw_but_du4 = true;
+            this.m_bw_slider.visible = false;
+            this.mitem_bw_dither_invert.visible = true;
+            // use A2 waveform
+            ebc.PnProxy.SetDefaultWaveformSync(1);
+            // this._set_waveform(1);
+        } else if (new_mode == 2){
+            // Black & White mode
+            this.bw_but_grayscale.visible = true;
+            this.bw_but_bw_dither.visible = true;
+            this.bw_but_bw.visible = true;
+            this.bw_but_du4 = true;
+            this.m_bw_slider.visible = true;
+            this.mitem_bw_dither_invert.visible = true;
+            // use A2 waveform
+            // this._set_waveform(1);
+            ebc.PnProxy.SetDefaultWaveformSync(1);
+        } else if (new_mode == 3){
+            // DU4 mode
+            this.bw_but_grayscale.visible = true;
+            this.bw_but_bw_dither.visible = true;
+            this.bw_but_bw.visible = true;
+            this.bw_but_du4 = true;
+            this.m_bw_slider.visible = false;
+            this.mitem_bw_dither_invert.visible = true;
+            // use DU4 waveform
+            ebc.PnProxy.SetDefaultWaveformSync(3);
+        }
 
-		// trigger a global refresh
-		setTimeout(
-			ebc.ebc_trigger_global_refresh,
-			500
-		);
+        // trigger a global refresh
+        setTimeout(
+            ebc.ebc_trigger_global_refresh,
+            500
+        );
 
-	}
+    }
 
-	_add_bw_buttons() {
-		// add three buttons for grayscale, bw, bw+dithering modes
+    _add_bw_buttons() {
+        // add three buttons for grayscale, bw, bw+dithering modes
 
-		// 1
-		this.bw_but_grayscale = new PopupMenu.PopupMenuItem(_('Grayscale Mode'));
-		this.bw_but_grayscale.connect('activate', () => {
-			this._change_bw_mode(0);
-		});
-		this._indicator.menu.addMenuItem(this.bw_but_grayscale);
+        // 1
+        this.bw_but_grayscale = new PopupMenu.PopupMenuItem(_('Grayscale Mode'));
+        this.bw_but_grayscale.connect('activate', () => {
+            this._change_bw_mode(0);
+        });
+        this._indicator.menu.addMenuItem(this.bw_but_grayscale);
 
-		// 2
-		this.bw_but_bw_dither = new PopupMenu.PopupMenuItem(_('BW+Dither Mode'));
-		this.bw_but_bw_dither.connect('activate', () => {
-			this._change_bw_mode(1);
-		});
-		this._indicator.menu.addMenuItem(this.bw_but_bw_dither);
+        // 2
+        this.bw_but_bw_dither = new PopupMenu.PopupMenuItem(_('BW+Dither Mode'));
+        this.bw_but_bw_dither.connect('activate', () => {
+            this._change_bw_mode(1);
+        });
+        this._indicator.menu.addMenuItem(this.bw_but_bw_dither);
 
-		// 3
-		this.bw_but_bw = new PopupMenu.PopupMenuItem(_('BW Mode'));
-		this.bw_but_bw.connect('activate', () => {
-			this._change_bw_mode(2);
-		});
-		this._indicator.menu.addMenuItem(this.bw_but_bw);
+        // 3
+        this.bw_but_bw = new PopupMenu.PopupMenuItem(_('BW Mode'));
+        this.bw_but_bw.connect('activate', () => {
+            this._change_bw_mode(2);
+        });
+        this._indicator.menu.addMenuItem(this.bw_but_bw);
 
-		this._add_bw_slider();
+        this._add_bw_slider();
 
-		// 4
-		this.bw_but_du4 = new PopupMenu.PopupMenuItem(_('DU4 Mode'));
-		this.bw_but_du4.connect('activate', () => {
-			this._change_bw_mode(3);
-		});
-		this._indicator.menu.addMenuItem(this.bw_but_du4);
-	}
+        // 4
+        this.bw_but_du4 = new PopupMenu.PopupMenuItem(_('DU4 Mode'));
+        this.bw_but_du4.connect('activate', () => {
+            this._change_bw_mode(3);
+        });
+        this._indicator.menu.addMenuItem(this.bw_but_du4);
+    }
 
-	_add_bw_slider() {
-		console.log("pnhelper: adding bw slider");
-		this.m_bw_slider = new PopupMenu.PopupBaseMenuItem({ activate: true });
-		this._indicator.menu.addMenuItem(this.m_bw_slider);
+    _add_bw_slider() {
+        console.log("pnhelper: adding bw slider");
+        this.m_bw_slider = new PopupMenu.PopupBaseMenuItem({ activate: true });
+        this._indicator.menu.addMenuItem(this.m_bw_slider);
 
         this._bw_slider = new Slider.Slider(0.5);
 
@@ -648,291 +648,291 @@ export default class PnHelperExtension extends Extension {
         this.m_bw_slider.connect('scroll-event', (actor, event) => {
             return this._bw_slider.emit('scroll-event', event);
         });
-	}
-
-	_bw_slider_changed(){
-		let bw_threshold;
-		// transform to thresholds 1 to 7 in roughly similar-sized bins
-		bw_threshold = 4 + Math.floor(this._bw_slider.value * 9);
-		log(`new bw threshold: ${bw_threshold}`);
-		this._write_to_sysfs_file(
-			'/sys/module/rockchip_ebc/parameters/bw_threshold',
-			bw_threshold
-		);
-	}
-
-	_set_a1_waveform(){
-		this._write_to_sysfs_file(
-			'/sys/module/rockchip_ebc/parameters/default_waveform',
-			1
-		);
-	}
-
-	_set_waveform(waveform){
-		this._write_to_sysfs_file(
-			'/sys/module/rockchip_ebc/parameters/default_waveform',
-			waveform
-		);
-	}
-
-	_test_func(){
-		log("TEST function");
-
-		const test_dialog = new USBDialog();
-		test_dialog.open();
-		// let dd = test_dialog.result;
-		// log(`test dialog: ${dd}`);
-	}
-
-	_add_testing_button(){
-		let item;
-		item = new PopupMenu.PopupMenuItem(_('TEST'));
-		item.connect('activate', () => {
-			this._test_func();
-		});
-		this._indicator.menu.addMenuItem(item);
-	}
-
-	_add_usb_mtp_gadget_buttons(){
-		let item;
-		item = new PopupMenu.PopupMenuItem(_('Start USB MTP'));
-		item.connect('activate', () => {
-			usb.PnUSBProxy.usb_gadget_activate_mtpSync();
-		});
-		this._indicator.menu.addMenuItem(item);
-
-		let item2;
-		item2 = new PopupMenu.PopupMenuItem(_('Stop USB MTP'));
-		item2.connect('activate', () => {
-			usb.PnUSBProxy.usb_gadget_disable_mtpSync();
-		});
-		this._indicator.menu.addMenuItem(item2);
-	}
-
-	_add_waveform_buttons(){
-		let item;
-		item = new PopupMenu.PopupMenuItem(_('A2 Waveform'));
-		item.connect('activate', () => {
-			this._set_waveform(1);
-		});
-		this._indicator.menu.addMenuItem(item);
-
-		// item = new PopupMenu.PopupMenuItem(_('DU Waveform'));
-		// item.connect('activate', () => {
-		// 	this._set_waveform(2);
-		// });
-		// this._indicator.menu.addMenuItem(item);
-
-		item = new PopupMenu.PopupMenuItem(_('GC16 Waveform'));
-		item.connect('activate', () => {
-			this._set_waveform(4);
-		});
-		this._indicator.menu.addMenuItem(item);
-
-// 		item = new PopupMenu.PopupMenuItem(_('DU4 Waveform'));
-// 		item.connect('activate', () => {
-// 			this._set_waveform(7);
-// 		});
-// 		this._indicator.menu.addMenuItem(item);
-	}
-
-	_add_auto_refresh_button(){
-		let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
-
-		log(`add: auto refresh state: ${auto_refresh}`);
-
-		if(auto_refresh){
-			this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
-		} else {
-			this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
-		}
-		this.mitem_auto_refresh.connect('activate', () => {
-			this.toggle_auto_refresh();
-		});
-
-		this._indicator.menu.addMenuItem(this.mitem_auto_refresh);
-	}
-
-	toggle_auto_refresh(){
-		log("Toggling auto refresh");
-		let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
-		log(`toggle: auto refresh state: ${auto_refresh}`);
-
-		auto_refresh = !auto_refresh;
-
-		if(auto_refresh){
-			this.mitem_auto_refresh.label.set_text('Enable Autorefresh');
-		} else {
-			this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
-		}
-
-		this._settings.set_boolean('auto-refresh', auto_refresh);
-	}
-
-	_apply_auto_refresh(value) {
-		const auto_refresh = value ? 1 : 0;
-		log(`Setting auto refresh to ${auto_refresh}`);
-
-		ebc.PnProxy.SetAutoRefreshSync(value);
-	}
-
-	_add_dither_invert_button(){
-		this.mitem_bw_dither_invert = new PopupMenu.PopupMenuItem(_('BW Invert On'));
-		let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
-
-		if(bw_dither_invert){
-			this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-		} else {
-			this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-		}
-		this.mitem_bw_dither_invert.connect('activate', () => {
-			this.toggle_bw_dither_invert();
-		});
-
-		this._indicator.menu.addMenuItem(this.mitem_bw_dither_invert);
-	}
-
-	toggle_bw_dither_invert(){
-		let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
-		log(`Toggling dither invert (is: ${bw_dither_invert})`);
-
-		bw_dither_invert = !bw_dither_invert;
-
-		if(bw_dither_invert){
-			this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-		} else {
-			this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-		}
-		log(`new value: ${bw_dither_invert})`);
-
-		this._settings.set_boolean('bw-dither-invert', bw_dither_invert);
-	}
-
-	_apply_bw_dither_invert(value) {
-		const bw_dither_invert = value ? 1 : 0;
-		log(`Setting bw dither invert to ${bw_dither_invert}`);
-
-		ebc.PnProxy.SetBwDitherInvertSync(value);
-	}
-
-	_add_refresh_button(){
-		this._trigger_refresh_button = new TriggerRefreshButton();
-		Main.panel.addToStatusArea(
-			"PN Trigger Global Refresh",
-			this._trigger_refresh_button,
-			-1,
-			'center'
-		);
-	}
-
-	_add_performance_mode_button(){
-		this._performance_mode_button = new PerformanceModeButton(this.metadata, this._settings);
-		Main.panel.addToStatusArea(
-			"PN Switch Performance Modes",
-			this._performance_mode_button,
-			-1,
-			'center'
-		);
-	}
-
-    _add_warm_indicator_to_main_gnome_menu() {
-		// use the new quicksettings from GNOME 0.43
-		// https://gjs.guide/extensions/topics/quick-settings.html#example-usage
-		//
-		let brightness_file = "/sys/class/backlight/backlight_warm/brightness";
-		const file = Gio.file_new_for_path(brightness_file);
-		if (!file.query_exists(null)){
-			log("No warm backlight control found - will not add slider for that");
-			return;
-		}
-		// initialize a new slider object
-		// https://gjs.guide/extensions/topics/quick-settings.html
-		this._indicator2 = new QuickSettingsWarmSlider();
-		Main.panel.statusArea.quickSettings.addExternalIndicator(
-			this._indicator2,
-			2  // spawn two columns
-		);
-		// GLib.usleep(200000);
-		// approach 2: directly insert the slider at the correct position
-		// I think this fails because the other items are inserted
-		// asynchronously
-		// see ui/panel.js, line 622
-		// let sibling = Main.panel.statusArea.quickSettings._brightness;
-		// console.log(sibling);
-		// console.log(Main.panel.statusArea.quickSettings._indicators);
-		// Main.panel.statusArea.quickSettings._indicators.insert_child_below(
-		// 	this._indicator2,
-		// 	sibling
-		// );
     }
 
-	_add_travel_mode_toggle(){
-		this._indicator_travel_mode = new travel_mode.Indicator();
-		Main.panel.statusArea.quickSettings.addExternalIndicator(
-			this._indicator_travel_mode
-		);
-	}
+    _bw_slider_changed(){
+        let bw_threshold;
+        // transform to thresholds 1 to 7 in roughly similar-sized bins
+        bw_threshold = 4 + Math.floor(this._bw_slider.value * 9);
+        log(`new bw threshold: ${bw_threshold}`);
+        this._write_to_sysfs_file(
+            '/sys/module/rockchip_ebc/parameters/bw_threshold',
+            bw_threshold
+        );
+    }
 
-	_add_no_off_screen_button(){
-		console.log("pnhelper: adding off screen button");
-		this.mitem_no_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
+    _set_a1_waveform(){
+        this._write_to_sysfs_file(
+            '/sys/module/rockchip_ebc/parameters/default_waveform',
+            1
+        );
+    }
 
-		// Initialize
-		const no_off_screen = this._settings.get_boolean("no-off-screen");
-		if (no_off_screen != ebc.PnProxy.GetNoOffScreenSync()) {
-			this._apply_no_off_screen(no_off_screen);
-		}
+    _set_waveform(waveform){
+        this._write_to_sysfs_file(
+            '/sys/module/rockchip_ebc/parameters/default_waveform',
+            waveform
+        );
+    }
 
-		this.mitem_no_off_screen.connect('activate', () => {
-			this.toggle_no_off_screen();
-		});
+    _test_func(){
+        log("TEST function");
 
-		this._indicator.menu.addMenuItem(this.mitem_no_off_screen);
+        const test_dialog = new USBDialog();
+        test_dialog.open();
+        // let dd = test_dialog.result;
+        // log(`test dialog: ${dd}`);
+    }
 
-		ebc.PnProxy.connectSignal("NoOffScreenChanged", this.update_no_off_screen_button.bind(this));
+    _add_testing_button(){
+        let item;
+        item = new PopupMenu.PopupMenuItem(_('TEST'));
+        item.connect('activate', () => {
+            this._test_func();
+        });
+        this._indicator.menu.addMenuItem(item);
+    }
 
-		this.update_no_off_screen_button();
-	}
+    _add_usb_mtp_gadget_buttons(){
+        let item;
+        item = new PopupMenu.PopupMenuItem(_('Start USB MTP'));
+        item.connect('activate', () => {
+            usb.PnUSBProxy.usb_gadget_activate_mtpSync();
+        });
+        this._indicator.menu.addMenuItem(item);
 
-	toggle_no_off_screen(){
-		let no_off_screen = ebc.PnProxy.GetNoOffScreenSync()[0];
-		log(`Toggling no off screen (is: ${no_off_screen}, settings: ${this._settings.get_boolean('no-off-screen')})`);
-		const force = no_off_screen != this._settings.get_boolean('no-off-screen');
+        let item2;
+        item2 = new PopupMenu.PopupMenuItem(_('Stop USB MTP'));
+        item2.connect('activate', () => {
+            usb.PnUSBProxy.usb_gadget_disable_mtpSync();
+        });
+        this._indicator.menu.addMenuItem(item2);
+    }
 
-		no_off_screen = !no_off_screen;
-		log(`new value: ${no_off_screen}`);
+    _add_waveform_buttons(){
+        let item;
+        item = new PopupMenu.PopupMenuItem(_('A2 Waveform'));
+        item.connect('activate', () => {
+            this._set_waveform(1);
+        });
+        this._indicator.menu.addMenuItem(item);
 
-		this._settings.set_boolean('no-off-screen', no_off_screen);
-		if (force) {
-			log(`no_off_screen was out of sync with settings`);
-			this._apply_no_off_screen(no_off_screen);
-		}
-	}
+        // item = new PopupMenu.PopupMenuItem(_('DU Waveform'));
+        // item.connect('activate', () => {
+        //  this._set_waveform(2);
+        // });
+        // this._indicator.menu.addMenuItem(item);
 
-	_apply_no_off_screen(value) {
-		const no_off_screen = value ? 1 : 0;
-		log(`Setting no off screen to ${no_off_screen}`);
+        item = new PopupMenu.PopupMenuItem(_('GC16 Waveform'));
+        item.connect('activate', () => {
+            this._set_waveform(4);
+        });
+        this._indicator.menu.addMenuItem(item);
 
-		ebc.PnProxy.SetNoOffScreenSync(value);
-	}
+//      item = new PopupMenu.PopupMenuItem(_('DU4 Waveform'));
+//      item.connect('activate', () => {
+//          this._set_waveform(7);
+//      });
+//      this._indicator.menu.addMenuItem(item);
+    }
 
-	update_no_off_screen_button() {
-		let no_off_screen = ebc.PnProxy.GetNoOffScreenSync();
-		this.mitem_no_off_screen.label.set_text(`${no_off_screen ? 'Clear' : 'Keep'} screen on Suspend`);
-	}
+    _add_auto_refresh_button(){
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
+
+        log(`add: auto refresh state: ${auto_refresh}`);
+
+        if(auto_refresh){
+            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
+        } else {
+            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
+        }
+        this.mitem_auto_refresh.connect('activate', () => {
+            this.toggle_auto_refresh();
+        });
+
+        this._indicator.menu.addMenuItem(this.mitem_auto_refresh);
+    }
+
+    toggle_auto_refresh(){
+        log("Toggling auto refresh");
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
+        log(`toggle: auto refresh state: ${auto_refresh}`);
+
+        auto_refresh = !auto_refresh;
+
+        if(auto_refresh){
+            this.mitem_auto_refresh.label.set_text('Enable Autorefresh');
+        } else {
+            this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
+        }
+
+        this._settings.set_boolean('auto-refresh', auto_refresh);
+    }
+
+    _apply_auto_refresh(value) {
+        const auto_refresh = value ? 1 : 0;
+        log(`Setting auto refresh to ${auto_refresh}`);
+
+        ebc.PnProxy.SetAutoRefreshSync(value);
+    }
+
+    _add_dither_invert_button(){
+        this.mitem_bw_dither_invert = new PopupMenu.PopupMenuItem(_('BW Invert On'));
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
+
+        if(bw_dither_invert){
+            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
+        } else {
+            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
+        }
+        this.mitem_bw_dither_invert.connect('activate', () => {
+            this.toggle_bw_dither_invert();
+        });
+
+        this._indicator.menu.addMenuItem(this.mitem_bw_dither_invert);
+    }
+
+    toggle_bw_dither_invert(){
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
+        log(`Toggling dither invert (is: ${bw_dither_invert})`);
+
+        bw_dither_invert = !bw_dither_invert;
+
+        if(bw_dither_invert){
+            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
+        } else {
+            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
+        }
+        log(`new value: ${bw_dither_invert})`);
+
+        this._settings.set_boolean('bw-dither-invert', bw_dither_invert);
+    }
+
+    _apply_bw_dither_invert(value) {
+        const bw_dither_invert = value ? 1 : 0;
+        log(`Setting bw dither invert to ${bw_dither_invert}`);
+
+        ebc.PnProxy.SetBwDitherInvertSync(value);
+    }
+
+    _add_refresh_button(){
+        this._trigger_refresh_button = new TriggerRefreshButton();
+        Main.panel.addToStatusArea(
+            "PN Trigger Global Refresh",
+            this._trigger_refresh_button,
+            -1,
+            'center'
+        );
+    }
+
+    _add_performance_mode_button(){
+        this._performance_mode_button = new PerformanceModeButton(this.metadata, this._settings);
+        Main.panel.addToStatusArea(
+            "PN Switch Performance Modes",
+            this._performance_mode_button,
+            -1,
+            'center'
+        );
+    }
+
+    _add_warm_indicator_to_main_gnome_menu() {
+        // use the new quicksettings from GNOME 0.43
+        // https://gjs.guide/extensions/topics/quick-settings.html#example-usage
+        //
+        let brightness_file = "/sys/class/backlight/backlight_warm/brightness";
+        const file = Gio.file_new_for_path(brightness_file);
+        if (!file.query_exists(null)){
+            log("No warm backlight control found - will not add slider for that");
+            return;
+        }
+        // initialize a new slider object
+        // https://gjs.guide/extensions/topics/quick-settings.html
+        this._indicator2 = new QuickSettingsWarmSlider();
+        Main.panel.statusArea.quickSettings.addExternalIndicator(
+            this._indicator2,
+            2  // spawn two columns
+        );
+        // GLib.usleep(200000);
+        // approach 2: directly insert the slider at the correct position
+        // I think this fails because the other items are inserted
+        // asynchronously
+        // see ui/panel.js, line 622
+        // let sibling = Main.panel.statusArea.quickSettings._brightness;
+        // console.log(sibling);
+        // console.log(Main.panel.statusArea.quickSettings._indicators);
+        // Main.panel.statusArea.quickSettings._indicators.insert_child_below(
+        //  this._indicator2,
+        //  sibling
+        // );
+    }
+
+    _add_travel_mode_toggle(){
+        this._indicator_travel_mode = new travel_mode.Indicator();
+        Main.panel.statusArea.quickSettings.addExternalIndicator(
+            this._indicator_travel_mode
+        );
+    }
+
+    _add_no_off_screen_button(){
+        console.log("pnhelper: adding off screen button");
+        this.mitem_no_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
+
+        // Initialize
+        const no_off_screen = this._settings.get_boolean("no-off-screen");
+        if (no_off_screen != ebc.PnProxy.GetNoOffScreenSync()) {
+            this._apply_no_off_screen(no_off_screen);
+        }
+
+        this.mitem_no_off_screen.connect('activate', () => {
+            this.toggle_no_off_screen();
+        });
+
+        this._indicator.menu.addMenuItem(this.mitem_no_off_screen);
+
+        ebc.PnProxy.connectSignal("NoOffScreenChanged", this.update_no_off_screen_button.bind(this));
+
+        this.update_no_off_screen_button();
+    }
+
+    toggle_no_off_screen(){
+        let no_off_screen = ebc.PnProxy.GetNoOffScreenSync()[0];
+        log(`Toggling no off screen (is: ${no_off_screen}, settings: ${this._settings.get_boolean('no-off-screen')})`);
+        const force = no_off_screen != this._settings.get_boolean('no-off-screen');
+
+        no_off_screen = !no_off_screen;
+        log(`new value: ${no_off_screen}`);
+
+        this._settings.set_boolean('no-off-screen', no_off_screen);
+        if (force) {
+            log(`no_off_screen was out of sync with settings`);
+            this._apply_no_off_screen(no_off_screen);
+        }
+    }
+
+    _apply_no_off_screen(value) {
+        const no_off_screen = value ? 1 : 0;
+        log(`Setting no off screen to ${no_off_screen}`);
+
+        ebc.PnProxy.SetNoOffScreenSync(value);
+    }
+
+    update_no_off_screen_button() {
+        let no_off_screen = ebc.PnProxy.GetNoOffScreenSync();
+        this.mitem_no_off_screen.label.set_text(`${no_off_screen ? 'Clear' : 'Keep'} screen on Suspend`);
+    }
 
     enable() {
         log(`enabling ${this.metadata.name}`);
 
-		this._add_refresh_button();
-		this._add_performance_mode_button();
-		this._add_warm_indicator_to_main_gnome_menu();
-		this._add_travel_mode_toggle();
+        this._add_refresh_button();
+        this._add_performance_mode_button();
+        this._add_warm_indicator_to_main_gnome_menu();
+        this._add_travel_mode_toggle();
 
-		// ////////////////////////////////////////////////////////////////////
-		this._topBox = new St.BoxLayout({ });
+        // ////////////////////////////////////////////////////////////////////
+        this._topBox = new St.BoxLayout({ });
 
-		// Button 1
+        // Button 1
         let indicatorName = `${this.metadata.name} Indicator`;
 
         // Create a panel button
@@ -946,118 +946,118 @@ export default class PnHelperExtension extends Extension {
         });
         // this._indicator.add_child(icon);
 
-		// TODO
-		this._topBox.add_child(icon);
+        // TODO
+        this._topBox.add_child(icon);
 
-		this.panel_label = new St.Label({
-			text: "DADA",
+        this.panel_label = new St.Label({
+            text: "DADA",
             y_expand: true,
             y_align: Clutter.ActorAlign.CENTER,
         });
-		// Add the label
+        // Add the label
         // this._indicator.add_child(this.panel_label);
-		this.dbus_proxy = ebc.ebc_subscribe_to_waveformchanged(
-			this.onWaveformChanged.bind(this),
-			this.panel_label
-		);
+        this.dbus_proxy = ebc.ebc_subscribe_to_waveformchanged(
+            this.onWaveformChanged.bind(this),
+            this.panel_label
+        );
 
         this._topBox.add_child(this.panel_label);
         this._indicator.add_child(this._topBox);
-		// this._indicator.label_actor = this.panel_label;
-		// this._indicator.add_actor(this.panel_label);
+        // this._indicator.label_actor = this.panel_label;
+        // this._indicator.add_actor(this.panel_label);
 
         // `Main.panel` is the actual panel you see at the top of the screen,
         // // not a class constructor.
         Main.panel.addToStatusArea(
-			indicatorName,
-			this._indicator,
-			-2,
-			'center'
-		);
+            indicatorName,
+            this._indicator,
+            -2,
+            'center'
+        );
 
-		let item;
-		item = new PopupMenu.PopupMenuItem(_('Rotate'));
-		item.connect('activate', () => {
-			this.rotate_screen();
-		});
-		this._indicator.menu.addMenuItem(item);
+        let item;
+        item = new PopupMenu.PopupMenuItem(_('Rotate'));
+        item.connect('activate', () => {
+            this.rotate_screen();
+        });
+        this._indicator.menu.addMenuItem(item);
 
-		this._settings = this.getSettings();
-		this._settings.connect('changed::auto-refresh', (settings, key) => {
-			this._apply_auto_refresh(this._settings.get_boolean(key));
-		});
-		this._settings.connect('changed::bw-dither-invert', (settings, key) => {
-			this._apply_bw_dither_invert(this._settings.get_boolean(key));
-		});
-		this._settings.connect('changed::no-off-screen', (settings, key) => {
-			log(`changed::no-off-screen in PnHelperExtension.enable()`);
-			this._apply_no_off_screen(this._settings.get_boolean(key));
-		});
-		log("Added settings handlers in PnHelperExtension.enable()");
+        this._settings = this.getSettings();
+        this._settings.connect('changed::auto-refresh', (settings, key) => {
+            this._apply_auto_refresh(this._settings.get_boolean(key));
+        });
+        this._settings.connect('changed::bw-dither-invert', (settings, key) => {
+            this._apply_bw_dither_invert(this._settings.get_boolean(key));
+        });
+        this._settings.connect('changed::no-off-screen', (settings, key) => {
+            log(`changed::no-off-screen in PnHelperExtension.enable()`);
+            this._apply_no_off_screen(this._settings.get_boolean(key));
+        });
+        log("Added settings handlers in PnHelperExtension.enable()");
 
-		this._add_bw_buttons();
-		this._add_dither_invert_button();
-		this._add_auto_refresh_button();
-		// this._add_waveform_buttons();
-		// this._add_testing_button();
-		this._add_usb_mtp_gadget_buttons();
-		this._add_no_off_screen_button();
+        this._add_bw_buttons();
+        this._add_dither_invert_button();
+        this._add_auto_refresh_button();
+        // this._add_waveform_buttons();
+        // this._add_testing_button();
+        this._add_usb_mtp_gadget_buttons();
+        this._add_no_off_screen_button();
 
-		// activate default grayscale mode
-		//this._change_bw_mode(0);
+        // activate default grayscale mode
+        //this._change_bw_mode(0);
 
-		// this._btpen = new btpen.Indicator_ng();
-		this.update_panel_label();
+        // this._btpen = new btpen.Indicator_ng();
+        this.update_panel_label();
     }
 
-	_get_content(sysfs_file){
-		// read current value
-		const file = Gio.File.new_for_path(sysfs_file);
-		const [, contents, etag] = file.load_contents(null);
-		const ByteArray = imports.byteArray;
-		const contentsString = ByteArray.toString(contents);
+    _get_content(sysfs_file){
+        // read current value
+        const file = Gio.File.new_for_path(sysfs_file);
+        const [, contents, etag] = file.load_contents(null);
+        const ByteArray = imports.byteArray;
+        const contentsString = ByteArray.toString(contents);
 
-		return contentsString.replace(/[\n\r]/g, '');
-	}
+        return contentsString.replace(/[\n\r]/g, '');
+    }
 
     // REMINDER: It's required for extensions to clean up after themselves when
     // they are disabled. This is required for approval during review!
     disable() {
         log(`disabling ${this.metadata.name}`);
 
-		ebc.ebc_unsubscribe(this.dbus_proxy)
+        ebc.ebc_unsubscribe(this.dbus_proxy)
 
         this._indicator.destroy();
         this._indicator = null;
 
-		this._trigger_refresh_button.destroy();
-		this._trigger_refresh_button = null;
+        this._trigger_refresh_button.destroy();
+        this._trigger_refresh_button = null;
 
-		this._performance_mode_button.destroy();
-		this._performance_mode_button = null;
+        this._performance_mode_button.destroy();
+        this._performance_mode_button = null;
 
-		this._indicator2.destroy();
+        this._indicator2.destroy();
         this._indicator2 = null;
 
-		this._indicator_travel_mode.quickSettingsItems.forEach(item => item.destroy());
-		this._indicator_travel_mode.destroy();
-		this._indicator_travel_mode = null;
+        this._indicator_travel_mode.quickSettingsItems.forEach(item => item.destroy());
+        this._indicator_travel_mode.destroy();
+        this._indicator_travel_mode = null;
 
         this._settings = null;
     }
 
-	rotate_screen(){
-		log('rotate_screen start');
-    	// let state = get_state();
-    	// let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
-		// log(logical_monitor.transform);
-		this.rotate_to("left-up");
+    rotate_screen(){
+        log('rotate_screen start');
+        // let state = get_state();
+        // let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
+        // log(logical_monitor.transform);
+        this.rotate_to("left-up");
 
-	}
+    }
 
-	rotate_to(orientation) {
+    rotate_to(orientation) {
         log('Rotate screen to ' + orientation);
-		// display_rotator.toggle();
+        // display_rotator.toggle();
         let target = Orientation[orientation];
         try {
             GLib.spawn_async(

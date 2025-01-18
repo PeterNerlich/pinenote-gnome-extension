@@ -42,27 +42,27 @@ export var Monitor = class Monitor {
         this.connector = unpacked[0].unpack()[0].unpack();
 
         let modes = unpacked[1].unpack();
-		// print all available monitor ids
+        // print all available monitor ids
         // for (let i = 0; i < modes.length; i++) {
         //     let mode = modes[i].unpack();
         //     let id = mode[0].unpack();
-			// log(id);
-		// }
+            // log(id);
+        // }
 
         for (let i = 0; i < modes.length; i++) {
             let mode = modes[i].unpack();
             let mode_props = mode[6].unpack();
             let id = mode[0].unpack();
 
-			if ("is-current" in mode_props){
-				let is_current = mode_props['is-current'].unpack().get_boolean();
-				if (is_current) {
-					// log("found current");
-					this.current_mode_id = id;
-					break;
-				}
-        	}
-		}
+            if ("is-current" in mode_props){
+                let is_current = mode_props['is-current'].unpack().get_boolean();
+                if (is_current) {
+                    // log("found current");
+                    this.current_mode_id = id;
+                    break;
+                }
+            }
+        }
 
         let props = unpacked[2].unpack();
         if ('is-underscanning' in props) {
@@ -104,14 +104,14 @@ export var DisplayConfigState = class DisplayConfigState {
         this.monitors = [];
         let monitors = unpacked[1].unpack();
         monitors.forEach(monitor_packed => {
-			// log("optionals");
-			// log(monitor_packed.unpack()[1].unpack()[0].unpack()[6].unpack());
-			// let optionals = monitor_packed.unpack()[1].unpack()[3].unpack()[6].unpack();
-			// log("is-current" in optionals)
-			// for (var k in optionals){
-			// 	log(k);
-			// 	log(optionals[k]);
-			// }
+            // log("optionals");
+            // log(monitor_packed.unpack()[1].unpack()[0].unpack()[6].unpack());
+            // let optionals = monitor_packed.unpack()[1].unpack()[3].unpack()[6].unpack();
+            // log("is-current" in optionals)
+            // for (var k in optionals){
+            //  log(k);
+            //  log(optionals[k]);
+            // }
             let monitor = new Monitor(monitor_packed);
             this.monitors.push(monitor);
         });
