@@ -215,7 +215,7 @@ var PerformanceModeButton = GObject.registerClass(
         this._settings = settings;
         console.log(`PerformanceModeButton initializing with settings: ${this._settings}`);
 
-        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync()[0];
 
         let label_text = 'N'
         let new_mode = ''
@@ -265,7 +265,7 @@ var PerformanceModeButton = GObject.registerClass(
 
     switch_mode() {
         log('MODE SWITCH');
-        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync()[0];
         let new_mode = ''
 
         if (dclk_select == 0){
@@ -273,14 +273,12 @@ var PerformanceModeButton = GObject.registerClass(
             log('switching to performance mode');
             new_mode = '1872x1404@80.000';
             ebc.PnProxy.SetDclkSelectSync(1);
-            //this.panel_label.set_text('P');
         }
         else if (dclk_select == 1){
             log('switching to quality mode');
             // new_mode = '1872x1404@1.000';
             new_mode = '1872x1404@5.000';
             ebc.PnProxy.SetDclkSelectSync(0);
-            //this.panel_label.set_text('Q');
         } else
             return;
         this.update_label()
@@ -311,7 +309,7 @@ var PerformanceModeButton = GObject.registerClass(
     }
 
     update_label() {
-        const dclk_select = ebc.PnProxy.GetDclkSelectSync();
+        const dclk_select = ebc.PnProxy.GetDclkSelectSync()[0];
         this.panel_label.set_text(dclk_select == 1 ? 'P' : 'Q');
     }
 
@@ -486,8 +484,8 @@ export default class PnHelperExtension extends Extension {
     }
 
     update_panel_label() {
-        const waveform = ebc.PnProxy.GetDefaultWaveformSync();
-        const bw_mode = ebc.PnProxy.GetBwModeSync();
+        const waveform = ebc.PnProxy.GetDefaultWaveformSync()[0];
+        const bw_mode = ebc.PnProxy.GetBwModeSync()[0];
         var new_label = '';
         if (bw_mode == 0){
             new_label += 'G:';
@@ -736,33 +734,31 @@ export default class PnHelperExtension extends Extension {
     }
 
     _add_auto_refresh_button(){
-        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
+        this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Auto Refresh Enabled'));
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync()[0];
 
-        log(`add: auto refresh state: ${auto_refresh}`);
-
-        if(auto_refresh){
-            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
-        } else {
-            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
-        }
         this.mitem_auto_refresh.connect('activate', () => {
             this.toggle_auto_refresh();
         });
 
         this._indicator.menu.addMenuItem(this.mitem_auto_refresh);
+
+        ebc.PnProxy.connectSignal("AutoRefreshChanged", this.update_auto_refresh_button.bind(this));
+
+        this.update_auto_refresh_button();
     }
 
     toggle_auto_refresh(){
-        log("Toggling auto refresh");
-        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync();
-        log(`toggle: auto refresh state: ${auto_refresh}`);
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync()[0];
+        log(`auto_refresh is ${auto_refresh} (${typeof auto_refresh})`);
+        const force = auto_refresh != this._settings.get_boolean('auto-refresh');
 
         auto_refresh = !auto_refresh;
 
-        if(auto_refresh){
-            this.mitem_auto_refresh.label.set_text('Enable Autorefresh');
-        } else {
-            this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
+        this._settings.set_boolean('auto-refresh', auto_refresh);
+        if (force) {
+            log(`auto_refresh was out of sync with settings`);
+            this._apply_auto_refresh(auto_refresh);
         }
 
         this._settings.set_boolean('auto-refresh', auto_refresh);
@@ -775,34 +771,37 @@ export default class PnHelperExtension extends Extension {
         ebc.PnProxy.SetAutoRefreshSync(value);
     }
 
+    update_auto_refresh_button(){
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync()[0];
+        this.mitem_auto_refresh.label.set_text(`Auto Refresh ${auto_refresh ? 'Enabled' : 'Disabled'}`);
+    }
+
     _add_dither_invert_button(){
         this.mitem_bw_dither_invert = new PopupMenu.PopupMenuItem(_('BW Invert On'));
-        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync()[0];
 
-        if(bw_dither_invert){
-            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-        } else {
-            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-        }
         this.mitem_bw_dither_invert.connect('activate', () => {
             this.toggle_bw_dither_invert();
         });
 
         this._indicator.menu.addMenuItem(this.mitem_bw_dither_invert);
+
+        ebc.PnProxy.connectSignal("BwDitherInvertChanged", this.update_bw_dither_invert_button.bind(this));
+
+        this.update_bw_dither_invert_button();
     }
 
     toggle_bw_dither_invert(){
-        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync();
-        log(`Toggling dither invert (is: ${bw_dither_invert})`);
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync()[0];
+        const force = bw_dither_invert != this._settings.get_boolean('bw-dither-invert');
 
         bw_dither_invert = !bw_dither_invert;
 
-        if(bw_dither_invert){
-            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-        } else {
-            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
+        this._settings.set_boolean('bw-dither-invert', bw_dither_invert);
+        if (force) {
+            log(`bw_dither_invert was out of sync with settings`);
+            this._apply_bw_dither_invert(bw_dither_invert);
         }
-        log(`new value: ${bw_dither_invert})`);
 
         this._settings.set_boolean('bw-dither-invert', bw_dither_invert);
     }
@@ -812,6 +811,11 @@ export default class PnHelperExtension extends Extension {
         log(`Setting bw dither invert to ${bw_dither_invert}`);
 
         ebc.PnProxy.SetBwDitherInvertSync(value);
+    }
+
+    update_bw_dither_invert_button() {
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync()[0];
+        this.mitem_bw_dither_invert.label.set_text(`BW Invert ${bw_dither_invert ? 'On' : 'Off'}`);
     }
 
     _add_refresh_button(){
@@ -866,14 +870,14 @@ export default class PnHelperExtension extends Extension {
     }
 
     _add_travel_mode_toggle(){
-        this._indicator_travel_mode = new travel_mode.Indicator();
+        this._indicator_travel_mode = new travel_mode.Indicator(this._settings);
         Main.panel.statusArea.quickSettings.addExternalIndicator(
             this._indicator_travel_mode
         );
     }
 
     _add_no_off_screen_button(){
-        console.log("pnhelper: adding off screen button");
+        console.log("pnhelper: adding no off screen button");
         this.mitem_no_off_screen = new PopupMenu.PopupMenuItem(_('Clear Screen on Suspend'));
 
         // Initialize
@@ -895,11 +899,9 @@ export default class PnHelperExtension extends Extension {
 
     toggle_no_off_screen(){
         let no_off_screen = ebc.PnProxy.GetNoOffScreenSync()[0];
-        log(`Toggling no off screen (is: ${no_off_screen}, settings: ${this._settings.get_boolean('no-off-screen')})`);
         const force = no_off_screen != this._settings.get_boolean('no-off-screen');
 
         no_off_screen = !no_off_screen;
-        log(`new value: ${no_off_screen}`);
 
         this._settings.set_boolean('no-off-screen', no_off_screen);
         if (force) {
@@ -916,7 +918,7 @@ export default class PnHelperExtension extends Extension {
     }
 
     update_no_off_screen_button() {
-        let no_off_screen = ebc.PnProxy.GetNoOffScreenSync();
+        let no_off_screen = ebc.PnProxy.GetNoOffScreenSync()[0];
         this.mitem_no_off_screen.label.set_text(`${no_off_screen ? 'Clear' : 'Keep'} screen on Suspend`);
     }
 

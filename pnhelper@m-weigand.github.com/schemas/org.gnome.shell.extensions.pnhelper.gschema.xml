@@ -16,5 +16,10 @@
       <summary>No Off Screen</summary>
       <description>Whether the current screen contents should be kept when entering suspend</description>
     </key>
+    <key name="travel-mode" type="b">
+      <default>false</default>
+      <summary>Travel Mode</summary>
+      <description>Whether to suppress waking up the device when the cover is opened, so it doesn't drain the battery from shifting around in your bag</description>
+    </key>
   </schema>
 </schemalist>
