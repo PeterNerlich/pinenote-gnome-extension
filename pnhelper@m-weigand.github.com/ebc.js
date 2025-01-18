@@ -60,6 +60,8 @@ const PinenoteDbusInterface = `
     </signal>
     <signal name="BwModeChanged">
     </signal>
+    <signal name="BwDitherInvertChanged">
+    </signal>
     <signal name="DclkSelectChanged">
     </signal>
     <signal name="WaveformChanged">
