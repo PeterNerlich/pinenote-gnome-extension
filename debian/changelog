@@ -1,3 +1,11 @@
+pinenote-gnome-extension (1.7) trixie; urgency=medium
+
+  * A a travel-mode quicksetting toggle
+  * Remove debug entries in the menu
+  * Rearrange the BW slider
+
+ -- Maximilian Weigand <mweigand@mweigand.net>  Sat, 18 Jan 2025 21:51:29 +0100
+
 pinenote-gnome-extension (1.6) trixie; urgency=medium
 
   * Fix mode switching on newer gnome versions
