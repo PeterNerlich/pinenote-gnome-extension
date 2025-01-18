@@ -287,7 +287,6 @@ var PerformanceModeButton = GObject.registerClass(
         log("new mode:");
         log(new_mode);
 
-        console.log(`PerformanceModeButton.switch_mode() with settings: ${this._settings}`);
         ebc.PnProxy.SetNoOffScreenSync(this._settings.get_boolean('no-off-screen'));
 
         try {
@@ -313,7 +312,7 @@ var PerformanceModeButton = GObject.registerClass(
 
     update_label() {
         const dclk_select = ebc.PnProxy.GetDclkSelectSync();
-        this.panel_label.set_text(dclk_select ? 'P' : 'Q');
+        this.panel_label.set_text(dclk_select == 1 ? 'P' : 'Q');
     }
 
     _trigger_touch(widget, event) {
