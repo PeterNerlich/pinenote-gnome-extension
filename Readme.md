@@ -12,18 +12,19 @@ with care. Suggestions are welcome!**
 **Naturally, merge requests (or rewrites) are very welcome!**
 
 The extension provides/extends four GUI elements:
-	* A panel button to trigger to global screen refresh (the circular arrow
-	  next to the clock)
-	* A panel button to switch between performance (P) and quality mode (Q).
-	  This mainly changes frequencies of the underlying hardware. Q or
-	  P-labeled button in the panel, right of the global refresh button
-	* A menu providing quick access to certain Pinenote-related functionality.
-	  See screenshot below.
-	* Additions to the quicksettings of GNOME:
-		* A slider for the warm backlight (in addition to the cold backlight
-		  already controled by GNOME)
-		* A toggle for travel mode. This mode deactivates the functionality
-		  that wakes up the PineNote when the cover is lifted.
+
+* A panel button to trigger to global screen refresh (the circular arrow
+  next to the clock)
+* A panel button to switch between performance (P) and quality mode (Q).
+  This mainly changes frequencies of the underlying hardware. Q or
+  P-labeled button in the panel, right of the global refresh button
+* A menu providing quick access to certain Pinenote-related functionality.
+  See screenshot below.
+* Additions to the quicksettings of GNOME:
+	* A slider for the warm backlight (in addition to the cold backlight
+	  already controled by GNOME)
+	* A toggle for travel mode. This mode deactivates the functionality
+	  that wakes up the PineNote when the cover is lifted.
 
 The panel with global refresh and performance/quality mode, as was as the
 quick-access menu:
