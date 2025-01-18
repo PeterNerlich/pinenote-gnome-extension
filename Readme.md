@@ -27,11 +27,12 @@ The extension provides/extends four GUI elements:
 
 The panel with global refresh and performance/quality mode, as was as the
 quick-access menu:
-[screenshot](screenshot_menu.png)
+
+![screenshot](screenshot_menu.png)
 
 The extended quick settings of GNOME:
 
-[screenshot](screenshot_quicksettings.png)
+![screenshot](screenshot_quicksettings.png)
 
 
 ## Installation
