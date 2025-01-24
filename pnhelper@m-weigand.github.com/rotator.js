@@ -51,7 +51,7 @@ function rotate_to(transform) {
     // let variant = state.pack_to_apply( BusUtils.Methods['temporary'] );
     let variant = state.pack_to_apply( BusUtils.Methods['persistent'] );
     call_dbus_method('ApplyMonitorsConfig', variant);
-	log("rotation done");
+    log("rotation done");
 }
 
 let state = get_state();
@@ -65,14 +65,14 @@ log("current monitor state:");
 log(logical_monitor.transform);
 let target_orientation;
 switch (logical_monitor.transform) {
-	case 0:
-	case 2:
-		target_orientation = 1;
-		break;
-	case 1:
-	case 3:
-		target_orientation = 0;
-		break;
+    case 0:
+    case 2:
+        target_orientation = 1;
+        break;
+    case 1:
+    case 3:
+        target_orientation = 0;
+        break;
 }
 log("target");
 log(target_orientation);

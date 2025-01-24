@@ -65,32 +65,32 @@ export var PnProxy = new PinenoteDbusProxy(
 );
 
 export function ebc_trigger_global_refresh(){
-	PnProxy.TriggerGlobalRefreshSync();
+    PnProxy.TriggerGlobalRefreshSync();
 }
 
 export function ebc_subscribe_to_waveformchanged(func, widget){
-	function func_signal (connection, sender, path, iface, signal, params){
-		func(connection, sender, path, iface, signal, params, widget);
-	}
-	const ebc_dbus = PnProxy.connectSignal(
-		"WaveformChanged", func_signal
-	);
-  return(ebc_dbus);
+    function func_signal (connection, sender, path, iface, signal, params){
+        func(connection, sender, path, iface, signal, params, widget);
+    }
+    const ebc_dbus = PnProxy.connectSignal(
+        "WaveformChanged", func_signal
+    );
+    return(ebc_dbus);
 }
 
 // the pinenote-dbus-service can emit a signal which indicates that a
 // performance-mode-change was requested
 export function ebc_subscribe_to_requestperformancemode(func, widget){
-	function func_signal (connection, sender, path, iface, signal, params){
-		func(connection, sender, path, iface, signal, params, widget);
-	}
-	const ebc_dbus = PnProxy.connectSignal(
-		"ReqQualityOrPerformance", func_signal
-	);
-  return(ebc_dbus);
+    function func_signal (connection, sender, path, iface, signal, params){
+        func(connection, sender, path, iface, signal, params, widget);
+    }
+    const ebc_dbus = PnProxy.connectSignal(
+        "ReqQualityOrPerformance", func_signal
+    );
+    return(ebc_dbus);
 }
 
 //Disconnect from the dbus signal when the extension is stopped
 export function ebc_unsubscribe(dbus_handler){
-  PnProxy.disconnectSignal(dbus_handler);
+    PnProxy.disconnectSignal(dbus_handler);
 }
