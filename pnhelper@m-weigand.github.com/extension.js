@@ -461,15 +461,6 @@ export default class PnHelperExtension extends Extension {
         super(metadata);
         this._indicator = null;
         this._indicator2 = null;
-
-        const home = GLib.getenv("HOME");
-        // sometimes (on first boot), we do not want the overview to be shown.
-        // We want to directly go to the auto-started applications
-        const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
-        if (file.query_exists(null)){
-            log("disabling overview");
-            Main.sessionMode.hasOverview = false;
-        }
     }
 
     onWaveformChanged(connection, sender, path, iface, signal, params, widget) {
@@ -858,6 +849,15 @@ export default class PnHelperExtension extends Extension {
 
     enable() {
         log(`enabling ${this.metadata.name}`);
+
+        const home = GLib.getenv("HOME");
+        // sometimes (on first boot), we do not want the overview to be shown.
+        // We want to directly go to the auto-started applications
+        const file = Gio.file_new_for_path(home + "/.config/pinenote/do_not_show_overview");
+        if (file.query_exists(null)){
+            log("disabling overview");
+            Main.sessionMode.hasOverview = false;
+        }
 
         this.add_refresh_button();
         this.add_performance_mode_button();
