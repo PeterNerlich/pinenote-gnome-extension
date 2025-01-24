@@ -109,7 +109,6 @@ var USBDialog = GObject.registerClass(
                 },
                 //default: true,
             });
-
         }
 
         _set_result(result) {
@@ -257,7 +256,6 @@ var PerformanceModeButton = GObject.registerClass(
         this.connect('button-press-event', this._trigger_btn.bind(this));
         this.connect('touch-event', this._trigger_touch.bind(this));
     }
-
 
     switch_mode() {
         log('MODE SWITCH');
@@ -575,7 +573,6 @@ export default class PnHelperExtension extends Extension {
             ebc.ebc_trigger_global_refresh,
             500
         );
-
     }
 
     _add_bw_buttons() {
@@ -762,7 +759,6 @@ export default class PnHelperExtension extends Extension {
             filename,
             auto_refresh
         );
-
     }
 
     _add_dither_invert_button(){
@@ -974,7 +970,6 @@ export default class PnHelperExtension extends Extension {
         // let logical_monitor = state.get_logical_monitor_for(builtin_monitor.connector);
         // log(logical_monitor.transform);
         this.rotate_to("left-up");
-
     }
 
     rotate_to(orientation) {

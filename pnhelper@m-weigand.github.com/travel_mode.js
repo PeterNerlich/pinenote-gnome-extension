@@ -107,8 +107,6 @@ class TravelModeToggle extends QuickSettings.QuickToggle {
         }
         this._sync();
     }
-
-
 });
 
 
@@ -119,5 +117,4 @@ class Indicator extends QuickSettings.SystemIndicator {
         this._toggle = new TravelModeToggle();
         this.quickSettingsItems.push(this._toggle);
     }
-
 });
