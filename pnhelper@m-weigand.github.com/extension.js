@@ -279,27 +279,8 @@ var PerformanceModeButton = GObject.registerClass(
             return;
         log("new mode:");
         log(new_mode);
-        try {
-            // The process starts running immediately after this
-            // function is called. Any error thrown here will be a
-            // result of the process failing to start, not the success
-            // or failure of the process itself.
-            let proc = Gio.Subprocess.new(
-                // The program and command options are passed as a list
-                // of arguments
-                ['/bin/sh', '-c', `echo 1 > /sys/module/rockchip_ebc/parameters/no_off_screen`],
-                    // /sys/module/drm/parameters/debug'],
 
-                // The flags control what I/O pipes are opened and how they are directed
-                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
-            );
-
-            // Once the process has started, you can end it with
-            // `force_exit()`
-            // proc.force_exit();
-        } catch (e) {
-            logError(e);
-        }
+        ebc.PnProxy.SetNoOffScreenSync(true);
 
         try {
             GLib.spawn_async(
@@ -640,17 +621,11 @@ export default class PnHelperExtension extends Extension {
     }
 
     _set_a1_waveform(){
-        this._write_to_sysfs_file(
-            '/sys/module/rockchip_ebc/parameters/default_waveform',
-            1
-        );
+        ebc.PnProxy.SetDefaultWaveformSync(1);
     }
 
     _set_waveform(waveform){
-        this._write_to_sysfs_file(
-            '/sys/module/rockchip_ebc/parameters/default_waveform',
-            waveform
-        );
+        ebc.PnProxy.SetDefaultWaveformSync(waveform);
     }
 
     _test_func(){
@@ -715,16 +690,12 @@ export default class PnHelperExtension extends Extension {
     }
 
     _add_auto_refresh_button(){
-        let filename = '/sys/module/rockchip_ebc/parameters/auto_refresh'
-        let auto_refresh = this._get_content(filename);
+        this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync()[0];
 
         log(`add: auto refresh state: ${auto_refresh}`);
 
-        if(auto_refresh == 'N'){
-            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Enable Autorefresh'));
-        } else {
-            this.mitem_auto_refresh = new PopupMenu.PopupMenuItem(_('Disable Autorefresh'));
-        }
+        this.mitem_auto_refresh.label.set_text(`${auto_refresh ? 'Disable' : 'Enable'} Autorefresh`);
         this.mitem_auto_refresh.connect('activate', () => {
             this.toggle_auto_refresh();
         });
@@ -734,34 +705,21 @@ export default class PnHelperExtension extends Extension {
 
     toggle_auto_refresh(){
         log("Toggling atuo refresh");
-        let filename = '/sys/module/rockchip_ebc/parameters/auto_refresh'
-        let auto_refresh = this._get_content(filename);
+        let auto_refresh = ebc.PnProxy.GetAutoRefreshSync()[0];
         log(`toggle: auto refresh state: ${auto_refresh}`);
 
-        if(auto_refresh == 'N'){
-            auto_refresh = 1;
-            this.mitem_auto_refresh.label.set_text('Disable Autorefresh');
-        } else {
-            auto_refresh = 0;
-            this.mitem_auto_refresh.label.set_text('Enable Autorefresh');
-        }
+        auto_refresh = !auto_refresh;
 
-        this._write_to_sysfs_file(
-            filename,
-            auto_refresh
-        );
+        this.mitem_auto_refresh.label.set_text(`${auto_refresh ? 'Disable' : 'Enable'} Autorefresh`);
+
+        ebc.PnProxy.SetAutoRefreshSync(auto_refresh);
     }
 
     _add_dither_invert_button(){
         this.mitem_bw_dither_invert = new PopupMenu.PopupMenuItem(_('BW Invert On'));
-        let filename = '/sys/module/rockchip_ebc/parameters/bw_dither_invert'
-        let bw_dither_invert = this._get_content(filename);
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync()[0];
 
-        if(bw_dither_invert == 'N'){
-            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-        } else {
-            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-        }
+        this.mitem_bw_dither_invert.label.set_text(`BW Invert ${bw_dither_invert ? 'On' : 'Off'}`);
         this.mitem_bw_dither_invert.connect('activate', () => {
             this.toggle_bw_dither_invert();
         });
@@ -770,23 +728,15 @@ export default class PnHelperExtension extends Extension {
     }
 
     toggle_bw_dither_invert(){
-        let filename = '/sys/module/rockchip_ebc/parameters/bw_dither_invert'
-        let bw_dither_invert = this._get_content(filename);
+        let bw_dither_invert = ebc.PnProxy.GetBwDitherInvertSync()[0];
         log(`Toggling dither invert (is: ${bw_dither_invert})`);
 
-        if(bw_dither_invert == 0){
-            bw_dither_invert = 1;
-            this.mitem_bw_dither_invert.label.set_text('BW Invert Off');
-        } else {
-            bw_dither_invert = 0;
-            this.mitem_bw_dither_invert.label.set_text('BW Invert On');
-        }
+        bw_dither_invert = !bw_dither_invert;
+
+        this.mitem_bw_dither_invert.label.set_text(`BW Invert ${bw_dither_invert ? 'On' : 'Off'}`);
         log(`new value: ${bw_dither_invert})`);
 
-        this._write_to_sysfs_file(
-            filename,
-            bw_dither_invert
-        );
+        ebc.PnProxy.SetBwDitherInvertSync(bw_dither_invert);
     }
 
     add_refresh_button(){
