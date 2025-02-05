@@ -29,4 +29,3 @@ export var PnUSBProxy = new PinenoteUSBDbusProxy(
     "org.pinenote.usb",
     "/usb",
 );
-
